@@ -10,9 +10,9 @@ from PhyloDataset import *
 from PhyloTrees import *
 from vae import *
 
-datapath1 = "data/PF00072/PF00072_rp15_has_PF00196.faa"
-datapath2 = "data/PF00072/PF00072_rp15_has_PF00486.faa"
-datapath3 = "data/PF00072/PF00072_rp15_has_PF00512.faa"
+datapath1 = "../data/PF00072/PF00072_rp15_has_PF00196.faa"
+datapath2 = "../data/PF00072/PF00072_rp15_has_PF00486.faa"
+datapath3 = "../data/PF00072/PF00072_rp15_has_PF00512.faa"
 datapath4 = "data/PF00072/PF00072_rp15_has_PF00158.faa"
 datapath5 = "data/PF00072/PF00072_rp15_has_PF00990.faa"
 datapath6 = "data/PF00072/PF00072_rp15_has_PF01339.faa"
