@@ -361,7 +361,7 @@ class PhyloNode():#nn.Module
         loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
         self.coupling_loss_Parents = torch.tensor(0.0)
         if self.isRoot==False:
-            for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
+            for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.clone().detach().model.parameters()):
                 self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
         if recursive:
             for i in range(len(self.children)):
@@ -377,7 +377,7 @@ class PhyloNode():#nn.Module
         if self.isLeaf==False:
             for i in range(len(self.children)):
                 child = self.children[i]
-                for center_parameters, replica_parameters in zip(self.model.parameters(), child.model.parameters()):
+                for center_parameters, replica_parameters in zip(self.model.parameters(), child.model.clone().detach().parameters()):
                     self.coupling_loss_Children += loss_fn_elastic(center_parameters, replica_parameters)
         if recursive:
             for i in range(len(self.children)):
