@@ -5,9 +5,9 @@ Created on Mon Nov 15 17:30:33 2021
 @author: bartm
 """
 
-from src.PhyloDataset import *
-from src.PhyloTrees import *
-from src.vae 
+from ..src.PhyloDataset import *
+from ..src.PhyloTrees import *
+from ..src.vae import *
 
 datapath1 = "data/PF00072/PF00072_rp15_has_PF00196.faa"
 datapath2 = "data/PF00072/PF00072_rp15_has_PF00486.faa"
