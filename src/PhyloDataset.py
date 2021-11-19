@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 
 from torch._six import string_classes
-import collections
+import numpy as np
+from collections import defaultdict
 from torch.utils.data import Dataset, DataLoader
 
 
