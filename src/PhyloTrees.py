@@ -404,7 +404,7 @@ class PhyloNode(nn.Module):
         # self.coupling_loss_Parents(recursive=recursive)
         self.gammaManager.updateGamma()
         self.gammaManager.timestep += 1
-        self.zero_grad(self,recursive=True)
+        self.zero_grad(self,recursive=recursive)
         Totalloss = self.gammaManager.composeLoss(self)
         Totalloss.backward()
         torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1) 
