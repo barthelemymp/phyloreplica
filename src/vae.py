@@ -263,4 +263,4 @@ class VAE(nn.Module):
 def vae_loss(model, batch):
     seq = batch[0]
     weights = batch[1]
-    return -1*model.compute_weighted_elbo(seq, weight)
+    return -1*model.compute_weighted_elbo(seq, weights)
