@@ -152,20 +152,20 @@ class Callback_WandBSimpleLossSaver():
                     self.updatevalonChildren(Node.children[i],recursive=True)
         
         
-class gammaManager_Selflearning(nn.Module):
-    def __init__(self, startingTime, maxiter):
-        super(gammaManager_selflearning, self).__init__()
+# class gammaManager_Selflearning(nn.Module):
+#     def __init__(self, startingTime, maxiter):
+#         super(gammaManager_selflearning, self).__init__()
 
         
-    def composeLoss(self, Node):
-        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
+#     def composeLoss(self, Node):
+#         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
-    def updateGamma(self):
-            for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
-                self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
-        return self.gammaParents, self.gammaChildren
+#     def updateGamma(self):
+#         for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
+#             self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
+#         return self.gammaParents, self.gammaChildren
     
-    def reinitGamma(self, Node, finalsplit):
+#     def reinitGamma(self, Node, finalsplit):
 
 
 class PhyloNode(nn.Module):
@@ -189,7 +189,7 @@ class PhyloNode(nn.Module):
         self.parent = parent
         self.children = children
         self.isLeaf = len(children)==0
-        self.isRoot = parent)==None
+        self.isRoot = parent==None
         self.dataset = dataset
         self.batch_size = batch_size
         if dataset !=None:
@@ -205,7 +205,6 @@ class PhyloNode(nn.Module):
         self.batch = None
         self.tuplesize = tuplesize
         self.LossFunction = LossFunction
-        self.getinputTarget = getinputTarget
         
         self.isAttractedBychildren = False
         self.isAttractedByParent = False
@@ -378,7 +377,7 @@ class PhyloNode(nn.Module):
         if self.isLeaf==False:
             for i in range(len(self.children)):
                 child = self.children[i]
-                for center_parameters, replica_parameters in zip(self.model.parameters(), self.child.model.parameters()):
+                for center_parameters, replica_parameters in zip(self.model.parameters(), child.model.parameters()):
                     self.coupling_loss_Children += loss_fn_elastic(center_parameters, replica_parameters)
         if recursive:
             for i in range(len(self.children)):
