@@ -102,6 +102,7 @@ for step in range(Nstep):
     NodeR.trainmode(recursive=recursive)
     NodeR.computeLoss(recursive=recursive)
     NodeR.computeCouplingLossChildren(recursive=recursive)
+    print("children loss done")
     NodeR.computeCouplingLossParent(recursive=recursive)
     NodeR.trainingStep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
