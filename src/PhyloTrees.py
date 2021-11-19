@@ -323,13 +323,13 @@ class PhyloNode(nn.Module):
         self.model.eval()
         if recursive:
             for i in range(len(self.children)):
-                self.children[i].eval()
+                self.children[i].evalmode(recursive=recursive)
                 
     def trainmode(self,recursive=True):
         self.model.train()
         if recursive:
             for i in range(len(self.children)):
-                self.children[i].train()
+                self.children[i].trainmode(recursive=recursive)
         
     def zero_grad(self,recursive=True):
         self.optimizer.zero_grad()
