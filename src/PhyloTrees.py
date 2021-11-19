@@ -1,0 +1,440 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Nov 10 17:24:54 2021
+
+@author: bartm
+"""
+import torch
+import torch.nn as nn
+import torch.optim as optim
+import sys
+import math 
+import numpy as np
+import pandas as pd
+
+from torch._six import string_classes
+import collections
+from torch.utils.data import Dataset, DataLoader
+
+class gammaManager_Independant(nn.Module):
+    def __init__(self):
+        super(gammaManager_Independant, self).__init__()
+        self.gammaParents = torch.tensor(0.0)
+        self.gammaChildren = torch.tensor(0.0)
+        self.timestep = torch.tensor(0.0)
+        
+    def composeLoss(self, Node):
+        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
+    
+    def updateGamma(self):
+        return
+    
+    def reinitGamma(self, Node):
+        self.gammaParents = torch.tensor(0.0)
+        self.gammaChildren = torch.tensor(0.0)
+        
+    
+    
+class gammaManager_exponential(nn.Module):
+    def __init__(self, startingTime, maxiter):
+        super(gammaManager_exponential, self).__init__()
+        self.gammaParents_0 = torch.tensor(0.0)
+        self.gammaParents_1 = torch.tensor(0.0)
+        self.timestep = torch.tensor(0.0)
+        self.gammaChildren_0 = torch.tensor(0.0)
+        self.gammaChildren_1 = torch.tensor(0.0)
+        self.startingTime = startingTime
+        self.maxiter = maxiter
+        
+    def composeLoss(self, Node):
+        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
+    
+    def updateGamma(self):
+        return
+    
+    def reinitGamma(self, Node):
+        self.gammaParents_0 = Node.loss
+        self.gammaChildren = torch.tensor(0.0)
+    
+class gammaManager_Linear(nn.Module):
+    def __init__(self, startingTime, maxiter):
+        super(gammaManager_exponential, self).__init__()
+        self.gammaParents_0 = torch.tensor(0.0)
+        self.gammaParents = torch.tensor(0.0)
+        self.timestep = torch.tensor(0.0)
+        self.gammaChildren_0 = torch.tensor(0.0)
+        self.gammaChildren = torch.tensor(0.0)
+        self.startingTime = startingTime
+        self.maxiter = maxiter
+        
+    def composeLoss(self, Node):
+        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
+    
+    def updateGamma(self):
+        if self.timestep <= self.startingTime:
+            self.gammaParents = torch.tensor(0.0)
+            self.gammaChildren = torch.tensor(0.0)
+        else:
+            self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
+            self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
+            
+        return self.gammaParents, self.gammaChildren
+    
+    def reinitGamma(self, Node, finalsplit):
+        self.gammaParents_0 =finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
+        self.gammaChildren_0 = finalsplit* (Node.loss.clone.detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
+        
+    
+class Callback_SimpleLossSaver():
+    def __init__(self):
+        self.trainingloss = []
+        self.testingloss = []
+        self.validationloss = []
+        
+    def updatetrain(self,Node):
+        self.trainingloss.append(Node.loss.item())
+    def updatetest(self,Node):
+        self.testingloss.append(Node.loss.item())
+    def updateval(self,Node):
+        self.validationloss.append(Node.loss.item())
+        
+class Callback_WandBSimpleLossSaver():
+    def __init__(self, project):
+        import wandb
+        print("wandb imported")
+        wandb.login()
+        print("wandb login")
+        wandb.init(project=project, entity="barthelemymp")
+        self.config_dict = {
+        }
+        
+        self.trainingloss = []
+        self.testingloss = []
+        self.validationloss = []
+        
+    def updateconfig(self, config=None):
+        if config==None:
+            wandb.config.update(self.config_dict) 
+        else:
+            self.config_dict = config
+            wandb.config.update(self.config_dict) 
+    def updatetrain(self,Node, epoch, recursive=True):
+        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+        if Node.isLeaf==False:
+            if recursive:
+                for i in range(len(Node.children)):
+                    child = Node.children[i]
+                    self.updatetrain(child, epoch)
+
+    def updatetest(self, Node, recursive=True):
+        wandb.log({"Test loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+        if Node.isLeaf==False:
+            if recursive:
+                for i in range(len(Node.children)):
+                    child = Node.children[i]
+                    self.updatetest(child, epoch)
+                
+    def updateval(self, Node, recursive=True):
+        wandb.log({"Val loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+        if Node.isLeaf==False:
+            if recursive:
+                for i in range(len(Node.children)):
+                    child = Node.children[i]
+                    self.updateval(child, epoch)
+                    
+    def updatevalonChildren(self, Node, recursive=True):
+        for i in range(len(Node.children)):
+            loss = Node.LossFunction(Node.model, Node.children[i].batch)
+            wandb.log({"Val loss"+Node.Name+" on "+Node.children[i].Name: Node.loss.item(), "epoch":epoch})
+        if recursive:
+            for i in range(len(Node.children)):
+                if self.children[i].isLeaf==False:
+                    self.updatevalonChildren(Node.children[i],recursive=True)
+        
+        
+class gammaManager_Selflearning(nn.Module):
+    def __init__(self, startingTime, maxiter):
+        super(gammaManager_selflearning, self).__init__()
+
+        
+    def composeLoss(self, Node):
+        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
+    
+    def updateGamma(self):
+            for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
+                self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
+        return self.gammaParents, self.gammaChildren
+    
+    def reinitGamma(self, Node, finalsplit):
+
+
+class PhyloNode(nn.Module):
+    def __init__(self, 
+                 model, 
+                 optimizer, 
+                 LossFunction, 
+                 parent=None, 
+                 children=[], 
+                 dataset = None, 
+                 tuplesize=1, 
+                 batch_size=32, 
+                 gammaManager = gammaManager_Independant(),
+                 # callback=Callback_SimpleLossSaver(), 
+                 Name="Root"
+                 ):
+        super(PhyloNode, self).__init__()
+        self.model = model
+        self.Name = Name
+        self.optimizer = optimizer
+        self.parent = parent
+        self.children = children
+        self.isLeaf = len(children)==0
+        self.isRoot = parent)==None
+        self.dataset = dataset
+        self.batch_size = batch_size
+        if dataset !=None:
+            trainL = int(0.8 * len(dataset))
+            testL = int(0.1 * len(dataset))
+            valL = len(dataset) - trainL -testL
+            self.train_set, self.test_set,  self.val_set = torch.utils.data.random_split(dataset, [trainL, testL, valL])
+            self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True, num_workers=0))
+            self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True, num_workers=0))
+            self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True, num_workers=0))
+        self.gammaManager = gammaManager
+
+        self.batch = None
+        self.tuplesize = tuplesize
+        self.LossFunction = LossFunction
+        self.getinputTarget = getinputTarget
+        
+        self.isAttractedBychildren = False
+        self.isAttractedByParent = False
+        
+        self.coupling_loss_Parents = torch.tensor(0.0)
+        self.coupling_loss_Children = torch.tensor(0.0)
+        self.loss = torch.tensor(0.0)
+        
+
+    def getTrainLength(self): 
+        if self.isLeaf:
+            return int(0.8 * len(self.dataset))
+        else: 
+            l = 0
+            for i in range(len(self.children)):
+                l+=self.children[i].getTrainLength()
+            return l
+        
+    def getTestLength(self): 
+        if self.isLeaf:
+            return int(0.1 * len(self.dataset))
+        else: 
+            l = 0
+            for i in range(len(self.children)):
+                l+=self.children[i].getTestLength()
+            return l
+        
+    def getValLength(self): 
+        if self.isLeaf:
+            trainL = int(0.8 * len(self.dataset))
+            testL = int(0.1 * len(self.dataset))
+            valL = len(self.dataset) - trainL -testL
+            return valL
+        else: 
+            l = 0
+            for i in range(len(self.children)):
+                l+=self.children[i].getValLength()
+            return l
+    
+    
+
+    def getNewTrainBatch(self, fullBatch=False):
+        if self.isLeaf:
+            if fullBatch == False:
+                self.batch = next(self.train_iterator)
+            else:
+                self.batch = self.train_set[:]
+        else:
+            batchlist = []
+            for j in range(self.tuplesize):
+                batchlist.append([])
+            for i in range(len(self.children)):
+                child = self.children[i]
+                ba = child.getNewTrainBatch(fullBatch=fullBatch)
+                for j in range(self.tuplesize):
+                    batchlist[j].append(ba[j])
+            
+            seqs = torch.cat(batchlist[0], dim=0)
+            self.batch = (seqs,)
+            for j in range(1,self.tuplesize):
+                self.batch += (torch.cat(batchlist[j], dim=0),)
+        return self.batch
+    
+    
+    def getNewTestBatch(self, fullBatch=False):
+        if self.isLeaf:
+            if fullBatch == False:
+                self.batch = next(self.test_iterator)
+            else:
+                self.batch = self.test_set[:]
+        else:
+            batchlist = []
+            for j in range(self.tuplesize):
+                batchlist.append([])
+            for i in range(len(self.children)):
+                child = self.children[i]
+                ba = child.getNewTestBatch(fullBatch=fullBatch)
+                for j in range(self.tuplesize):
+                    batchlist[j].append(ba[j])
+            
+            seqs = torch.cat(batchlist[0], dim=0)
+            self.batch = (seqs,)
+            for j in range(1,self.tuplesize):
+                self.batch += (torch.cat(batchlist[j], dim=0),)
+        return self.batch
+    
+    def getNewValBatch(self, fullBatch=False):
+        if self.isLeaf:
+            if fullBatch == False:
+                self.batch = next(self.val_iterator)
+            else:
+                self.batch = self.val_set[:]
+        else:
+            batchlist = []
+            for j in range(self.tuplesize):
+                batchlist.append([])
+            for i in range(len(self.children)):
+                child = self.children[i]
+                ba = child.getNewValBatch(fullBatch=fullBatch)
+                for j in range(self.tuplesize):
+                    batchlist[j].append(ba[j])
+            
+            seqs = torch.cat(batchlist[0], dim=0)
+            self.batch = (seqs,)
+            for j in range(1,self.tuplesize):
+                self.batch += (torch.cat(batchlist[j], dim=0),)
+        return self.batch
+                
+    def computeLoss(self, recursive=True):
+        self.loss = self.LossFunction(self.model, self.batch)
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].computeLoss(recursive=True)
+        
+    def evalmode(self,recursive=True):
+        self.model.eval()
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].eval()
+                
+    def trainmode(self,recursive=True):
+        self.model.train()
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].train()
+        
+    def zero_grad(self,recursive=True):
+        self.optimizer.zero_grad()
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].optimizer.zero_grad()
+                
+    def set_isAttractedBychildren(self, newValue, recursive=True):
+        
+        if self.isLeaf:
+            self.isAttractedBychildren = False
+        else:
+            self.isAttractedBychildren = newValue
+            if recursive:
+                for i in range(len(self.children)):
+                    self.children[i].set_isAttractedBychildren(newValue, recursive=True)
+
+    def set_isAttractedByParent(self, newValue, recursive=True):
+        
+        if self.isRoot:
+            self.isAttractedByParent = False
+        else:
+            self.isAttractedByParent = newValue
+            if recursive:
+                for i in range(len(self.children)):
+                    self.children[i].set_isAttractedByParent(newValue, recursive=True)
+    
+    def coupling_loss_Parents(self, recursive=True):
+    
+        loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
+        self.coupling_loss_Parents = torch.tensor(0.0)
+        if self.isRoot==False:
+            for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
+                self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].coupling_loss_Parents(recursive=True)
+        return self.coupling_loss_Parents
+
+    
+    def coupling_loss_Children(self, recursive=True):
+        
+        loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
+        self.coupling_loss_Children = torch.tensor(0.0)
+        if self.isLeaf==False:
+            for i in range(len(self.children)):
+                child = self.children[i]
+                for center_parameters, replica_parameters in zip(self.model.parameters(), self.child.model.parameters()):
+                    self.coupling_loss_Children += loss_fn_elastic(center_parameters, replica_parameters)
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].coupling_loss_Parents(recursive=True)
+        return self.coupling_loss_Children
+    
+    def addChildren(self, child):
+        child.isRoot = False
+        self.isLeaf = False
+        self.children.append(child)
+        child.parent = self
+        
+    def addParent(self, parent):
+        assert (self.isRoot),"Already has a parent"
+        self.parent = parent
+        self.isRoot =False
+        parent.isLeaf = False
+        parent.children.append(self)
+        
+    def trainingStep(self, recursive=True):
+        # self.getnewTrainBatch()
+        # self.trainmode(recursive=recursive)
+        # self.computeLoss(recursive=recursive)
+        # self.coupling_loss_Children(recursive=recursive)
+        # self.coupling_loss_Parents(recursive=recursive)
+        self.gammaManager.updateGamma()
+        self.gammaManager.timestep += 1
+        self.zero_grad(self,recursive=True)
+        Totalloss = self.gammaManager.composeLoss(self)
+        Totalloss.backward()
+        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1) 
+        self.optimizer.step()
+        # self.callback.updatetrain(self)
+        
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].trainingStep(recursive=recursive)
+                
+    # def testingStep(self, recursive=True):
+    #     # self.getnewTrainBatch()
+    #     # self.trainmode(recursive=recursive)
+    #     # self.computeLoss(recursive=recursive)
+    #     # self.coupling_loss_Children(recursive=recursive)
+    #     # self.coupling_loss_Parents(recursive=recursive)
+    #     # self.gammaManager.updateGamma()
+    #     # self.gammaManager.timestep += 1
+    #     # self.zero_grad(self,recursive=True)
+    #     # Totalloss = self.gammaManager.composeLoss(self)
+    #     # Totalloss.backward()
+    #     # torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1) 
+    #     # self.optimizer.step()
+    #     self.callback.updatetest(self)
+    #     if recursive:
+    #         for i in range(len(self.children)):
+    #             self.children[i].trainingStep(recursive=recursive)
+
+        
+        
+        
