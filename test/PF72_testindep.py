@@ -96,7 +96,7 @@ callback = Callback_WandBSimpleLossSaver("pf72 phylotree")
 Nstep = 5000
 for step in range(Nstep):
     recursive = True
-    NodeR.getnewTrainBatch()
+    NodeR.getNewTrainBatch()
     NodeR.trainmode(recursive=recursive)
     NodeR.computeLoss(recursive=recursive)
     NodeR.coupling_loss_Children(recursive=recursive)
@@ -104,7 +104,7 @@ for step in range(Nstep):
     NodeR.trainingStep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
     if step%100==0:
-        NodeR.getnewTestBatch(recursive=recursive, fullBatch=True)
+        NodeR.getNewTestBatch(recursive=recursive, fullBatch=True)
         NodeR.evalmode(recursive=recursive)
         NodeR.computeLoss(recursive=recursive)
         callback.updatetest(NodeR, recursive=True)
