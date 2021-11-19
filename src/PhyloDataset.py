@@ -70,6 +70,7 @@ class MSA(torch.utils.data.Dataset):
         """
         seq_nat, w_nat, ks, q = read_fasta(fastaPath)
         self.q = q
+        self.get_fitness = get_fitness
         if get_fitness !=None:
             self.fitness = torch.tensor(list(map(get_fitness, ks)))
         
@@ -138,7 +139,7 @@ class MSA(torch.utils.data.Dataset):
     def __getitem__(self, idx): # from the dataset, gives the data in the form it will be used by the NN
         if torch.is_tensor(idx):
             idx = idx.tolist()
-        if get_fitness !=None:
+        if self.get_fitness !=None:
             return self.sequences[idx,:],self.train_weight[idx], self.fitness[idx]
         else:
             return self.sequences[idx,:], self.train_weight[idx]
