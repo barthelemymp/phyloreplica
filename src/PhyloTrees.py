@@ -357,8 +357,7 @@ class PhyloNode(nn.Module):
                 for i in range(len(self.children)):
                     self.children[i].set_isAttractedByParent(newValue, recursive=True)
     
-    def coupling_loss_Parents(self, recursive=True):
-    
+    def computeCouplingLossParent(self, recursive=True):
         loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
         self.coupling_loss_Parents = torch.tensor(0.0)
         if self.isRoot==False:
@@ -366,11 +365,11 @@ class PhyloNode(nn.Module):
                 self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
         if recursive:
             for i in range(len(self.children)):
-                self.children[i].coupling_loss_Parents(recursive=True)
+                self.children[i].computeCouplingLossParent(recursive=True)
         return self.coupling_loss_Parents
 
     
-    def coupling_loss_Children(self, recursive=True):
+    def computeCouplingLossChildren(self, recursive=True):
         
         loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
         self.coupling_loss_Children = torch.tensor(0.0)
@@ -381,7 +380,7 @@ class PhyloNode(nn.Module):
                     self.coupling_loss_Children += loss_fn_elastic(center_parameters, replica_parameters)
         if recursive:
             for i in range(len(self.children)):
-                self.children[i].coupling_loss_Parents(recursive=True)
+                self.children[i].computeCouplingLossChildren(recursive=True)
         return self.coupling_loss_Children
     
     def addChildren(self, child):

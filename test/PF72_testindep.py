@@ -99,8 +99,8 @@ for step in range(Nstep):
     NodeR.getNewTrainBatch()
     NodeR.trainmode(recursive=recursive)
     NodeR.computeLoss(recursive=recursive)
-    NodeR.coupling_loss_Children(recursive=recursive)
-    NodeR.coupling_loss_Parents(recursive=recursive)
+    NodeR.computeCouplingLossChildren(recursive=recursive)
+    NodeR.computeCouplingLossParent(recursive=recursive)
     NodeR.trainingStep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
     if step%100==0:
