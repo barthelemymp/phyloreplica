@@ -9,6 +9,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'src'))
 from PhyloDataset import *
 from PhyloTrees import *
 from vae import *
+import torch
+torch.autograd.set_detect_anomaly(True)
 
 datapath1 = "../data/PF00072/PF00072_rp15_has_PF00196.faa"
 datapath2 = "../data/PF00072/PF00072_rp15_has_PF00486.faa"

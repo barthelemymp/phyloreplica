@@ -168,7 +168,7 @@ class Callback_WandBSimpleLossSaver():
 #     def reinitGamma(self, Node, finalsplit):
 
 
-class PhyloNode(nn.Module):
+class PhyloNode():#nn.Module
     def __init__(self, 
                  model, 
                  optimizer, 
@@ -182,7 +182,7 @@ class PhyloNode(nn.Module):
                  # callback=Callback_SimpleLossSaver(), 
                  Name="Root"
                  ):
-        super(PhyloNode, self).__init__()
+        # super(PhyloNode, self).__init__()
         self.model = model
         self.Name = Name
         self.optimizer = optimizer
