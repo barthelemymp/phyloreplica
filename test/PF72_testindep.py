@@ -106,7 +106,7 @@ for step in range(Nstep):
     NodeR.computeCouplingLossParent(recursive=recursive)
     NodeR.trainingStep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
-    if step%100==0:
+    if step%100==50:
         NodeR.getNewTestBatch(fullBatch=True)
         NodeR.evalmode(recursive=recursive)
         NodeR.computeLoss(recursive=recursive)
