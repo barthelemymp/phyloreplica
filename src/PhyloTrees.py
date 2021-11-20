@@ -363,7 +363,7 @@ class PhyloNode():#nn.Module
         self.coupling_loss_Parents = torch.tensor(0.0)
         if self.isRoot==False:
             for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
-                self.coupling_loss_Parents += loss_fn_elastic(center_parameters, center_parameters.clone().detach())
+                self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters.clone().detach())
         if recursive:
             for i in range(len(self.children)):
                 print("lossparents", i)
@@ -412,12 +412,17 @@ class PhyloNode():#nn.Module
         Totalloss.backward()
         #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1)
         print(self.Name)
-        self.optimizer.step()
+        # self.optimizer.step()
         # self.callback.updatetrain(self)
         
         if recursive:
             for i in range(len(self.children)):
                 self.children[i].trainingStep(recursive=recursive)
+    def optimizerstep(self,recursive=True):
+        self.optimizer.step()
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].optimizerstep(recursive=recursive)
                 
     # def testingStep(self, recursive=True):
     #     # self.getnewTrainBatch()

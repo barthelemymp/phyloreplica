@@ -105,6 +105,7 @@ for step in range(Nstep):
     print("children loss done")
     NodeR.computeCouplingLossParent(recursive=recursive)
     NodeR.trainingStep(recursive=recursive)
+    NodeR.optimizerstep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
     if step%100==50:
         NodeR.getNewTestBatch(fullBatch=True)
