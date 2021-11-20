@@ -125,7 +125,7 @@ class Callback_WandBSimpleLossSaver():
             if recursive:
                 for i in range(len(Node.children)):
                     child = Node.children[i]
-                    self.updatetrain(child, epoch)
+                    self.updatetrain(child)
 
     def updatetest(self, Node, recursive=True):
         wandb.log({"Test loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
@@ -133,7 +133,7 @@ class Callback_WandBSimpleLossSaver():
             if recursive:
                 for i in range(len(Node.children)):
                     child = Node.children[i]
-                    self.updatetest(child, epoch)
+                    self.updatetest(child)
                 
     def updateval(self, Node, recursive=True):
         wandb.log({"Val loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
@@ -141,12 +141,12 @@ class Callback_WandBSimpleLossSaver():
             if recursive:
                 for i in range(len(Node.children)):
                     child = Node.children[i]
-                    self.updateval(child, epoch)
+                    self.updateval(child)
                     
     def updatevalonChildren(self, Node, recursive=True):
         for i in range(len(Node.children)):
             loss = Node.LossFunction(Node.model, Node.children[i].batch)
-            wandb.log({"Val loss"+Node.Name+" on "+Node.children[i].Name: Node.loss.item(), "epoch":epoch})
+            wandb.log({"Val loss"+Node.Name+" on "+Node.children[i].Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
         if recursive:
             for i in range(len(Node.children)):
                 if self.children[i].isLeaf==False:
