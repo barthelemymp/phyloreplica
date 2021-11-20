@@ -410,7 +410,8 @@ class PhyloNode():#nn.Module
         Totalloss = self.gammaManager.composeLoss(self)
         print("totaloss", Totalloss)
         Totalloss.backward()
-        torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1) 
+        #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1)
+        print(self.Name)
         self.optimizer.step()
         # self.callback.updatetrain(self)
         
