@@ -107,7 +107,7 @@ for step in range(Nstep):
     NodeR.trainingStep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
     if step%100==0:
-        NodeR.getNewTestBatch(recursive=recursive, fullBatch=True)
+        NodeR.getNewTestBatch(fullBatch=True)
         NodeR.evalmode(recursive=recursive)
         NodeR.computeLoss(recursive=recursive)
         callback.updatetest(NodeR, recursive=True)
