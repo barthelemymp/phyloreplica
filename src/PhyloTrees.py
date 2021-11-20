@@ -11,7 +11,7 @@ import sys
 import math 
 import numpy as np
 import pandas as pd
-
+import wandb 
 from torch._six import string_classes
 import collections
 from torch.utils.data import Dataset, DataLoader
@@ -27,7 +27,8 @@ class gammaManager_Independant(nn.Module):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
     def updateGamma(self):
-        return
+            self.timestep +=1
+
     
     def reinitGamma(self, Node):
         self.gammaParents = torch.tensor(0.0)
@@ -77,7 +78,7 @@ class gammaManager_Linear(nn.Module):
         else:
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
-            
+        self.timestep+=1
         return self.gammaParents, self.gammaChildren
     
     def reinitGamma(self, Node, finalsplit):
@@ -118,8 +119,8 @@ class Callback_WandBSimpleLossSaver():
         else:
             self.config_dict = config
             wandb.config.update(self.config_dict) 
-    def updatetrain(self,Node, epoch, recursive=True):
-        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+    def updatetrain(self,Node, recursive=True):
+        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
         if Node.isLeaf==False:
             if recursive:
                 for i in range(len(Node.children)):
@@ -127,7 +128,7 @@ class Callback_WandBSimpleLossSaver():
                     self.updatetrain(child, epoch)
 
     def updatetest(self, Node, recursive=True):
-        wandb.log({"Test loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+        wandb.log({"Test loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
         if Node.isLeaf==False:
             if recursive:
                 for i in range(len(Node.children)):
@@ -135,7 +136,7 @@ class Callback_WandBSimpleLossSaver():
                     self.updatetest(child, epoch)
                 
     def updateval(self, Node, recursive=True):
-        wandb.log({"Val loss"+Node.Name: Node.loss.item(), "epoch":epoch})
+        wandb.log({"Val loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
         if Node.isLeaf==False:
             if recursive:
                 for i in range(len(Node.children)):
