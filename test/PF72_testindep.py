@@ -34,7 +34,7 @@ l3 = 32 - l1 -l2
 vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
 optimizer1 = optim.Adam(vae1.parameters(),weight_decay=0.01)
 # gammaManager1 = gammaManager_Independant()
-gammaManager1 = gammaManager_Linear(500, 1500, 0.1)
+gammaManager1 = gammaManager_Linear(1, 1500, 0.1)
 
 Node1 = PhyloNode(vae1,
           optimizer1, 
