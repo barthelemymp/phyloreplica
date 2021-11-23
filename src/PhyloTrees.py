@@ -168,6 +168,16 @@ class Callback_WandBSimpleLossSaver():
     
 #     def reinitGamma(self, Node, finalsplit):
 
+    
+def nextInfinite(data_iter):
+    try:
+        data = next(data_iter) 
+    except StopIteration:
+        # StopIteration is thrown if dataset ends
+        # reinitialize data loader 
+        data_iter = iter(data_loader)
+        data = next(data_iter)
+
 
 class PhyloNode():#nn.Module
     def __init__(self, 
@@ -198,9 +208,9 @@ class PhyloNode():#nn.Module
             testL = int(0.1 * len(dataset))
             valL = len(dataset) - trainL -testL
             self.train_set, self.test_set,  self.val_set = torch.utils.data.random_split(dataset, [trainL, testL, valL])
-            self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True, num_workers=0))
-            self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True, num_workers=0))
-            self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True, num_workers=0))
+            self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True))
+            self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True))
+            self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True))
         self.gammaManager = gammaManager
 
         self.batch = None
@@ -214,7 +224,7 @@ class PhyloNode():#nn.Module
         self.coupling_loss_Children = torch.tensor(0.0)
         self.loss = torch.tensor(0.0)
         
-
+    
     def getTrainLength(self): 
         if self.isLeaf:
             return int(0.8 * len(self.dataset))
@@ -250,7 +260,13 @@ class PhyloNode():#nn.Module
     def getNewTrainBatch(self, fullBatch=False):
         if self.isLeaf:
             if fullBatch == False:
-                self.batch = next(self.train_iterator)
+                try:
+                    self.batch = next(self.train_iterator)
+                except StopIteration:
+                    # StopIteration is thrown if dataset ends
+                    # reinitialize data loader 
+                    self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True))
+                    self.batch = next(self.train_iterator)
             else:
                 self.batch = self.train_set[:]
         else:
@@ -273,7 +289,13 @@ class PhyloNode():#nn.Module
     def getNewTestBatch(self, fullBatch=False):
         if self.isLeaf:
             if fullBatch == False:
-                self.batch = next(self.test_iterator)
+                try:
+                    self.batch = next(self.test_iterator)
+                except StopIteration:
+                    # StopIteration is thrown if dataset ends
+                    # reinitialize data loader 
+                    self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True))
+                    self.batch = next(self.test_iterator)
             else:
                 self.batch = self.test_set[:]
         else:
@@ -295,6 +317,13 @@ class PhyloNode():#nn.Module
     def getNewValBatch(self, fullBatch=False):
         if self.isLeaf:
             if fullBatch == False:
+                try:
+                    self.batch = next(self.val_iterator)
+                except StopIteration:
+                    # StopIteration is thrown if dataset ends
+                    # reinitialize data loader 
+                    self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True))
+                    self.batch = next(self.val_iterator)
                 self.batch = next(self.val_iterator)
             else:
                 self.batch = self.val_set[:]
