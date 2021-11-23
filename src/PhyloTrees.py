@@ -65,9 +65,9 @@ class gammaManager_Linear(nn.Module):
         self.timestep = torch.tensor(0.0)
         self.gammaChildren_0 = torch.tensor(0.0)
         self.gammaChildren = torch.tensor(0.0)
-        self.startingTime = startingTime
-        self.maxiter = maxiter
-        self.finalsplit = finalsplit
+        self.startingTime = torch.tensor(startingTime)
+        self.maxiter = torch.tensor(maxiter)
+        self.finalsplit = torch.tensor(finalsplit)
     def composeLoss(self, Node):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
@@ -78,7 +78,6 @@ class gammaManager_Linear(nn.Module):
         elif self.timestep == self.startingTime:
             self.reinitGamma(Node)
         else:
-            print(self.gammaParents_0.shape, self.timestep,self.maxiter, self.startingTime)
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
         self.timestep+=1
@@ -116,14 +115,19 @@ class Callback_WandBSimpleLossSaver():
         self.testingloss = []
         self.validationloss = []
         
-    def updateconfig(self, config=None):
+    def pushConfig(self, config=None):
         if config==None:
             wandb.config.update(self.config_dict) 
         else:
             self.config_dict = config
             wandb.config.update(self.config_dict) 
+            
+    def updateConfig(self, key, value):
+        self.config_dict[key] = value
+        self.pushConfig()
+
     def updatetrain(self,Node, recursive=True):
-        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep})
+        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep, "gamma parents":Node.gammaManager.gammaParents, "gamma children":Node.gammaManager.gammaChildren })
         if Node.isLeaf==False:
             if recursive:
                 for i in range(len(Node.children)):
@@ -428,7 +432,6 @@ class PhyloNode():#nn.Module
         # self.coupling_loss_Children(recursive=recursive)
         # self.coupling_loss_Parents(recursive=recursive)
         self.gammaManager.updateGamma(self)
-        self.gammaManager.timestep += 1
         self.zero_grad(recursive=False)
         Totalloss = self.gammaManager.composeLoss(self)
         # print("totaloss", Totalloss)
