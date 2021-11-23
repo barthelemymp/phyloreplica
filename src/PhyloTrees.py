@@ -169,15 +169,6 @@ class Callback_WandBSimpleLossSaver():
 #     def reinitGamma(self, Node, finalsplit):
 
     
-def nextInfinite(data_iter):
-    try:
-        data = next(data_iter) 
-    except StopIteration:
-        # StopIteration is thrown if dataset ends
-        # reinitialize data loader 
-        data_iter = iter(data_loader)
-        data = next(data_iter)
-
 
 class PhyloNode():#nn.Module
     def __init__(self, 
@@ -265,7 +256,7 @@ class PhyloNode():#nn.Module
                 except StopIteration:
                     # StopIteration is thrown if dataset ends
                     # reinitialize data loader 
-                    self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True))
+                    self.train_iterator = iter(DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True))
                     self.batch = next(self.train_iterator)
             else:
                 self.batch = self.train_set[:]
@@ -294,7 +285,7 @@ class PhyloNode():#nn.Module
                 except StopIteration:
                     # StopIteration is thrown if dataset ends
                     # reinitialize data loader 
-                    self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True))
+                    self.test_iterator = iter(DataLoader(self.test_set, batch_size=self.batch_size, shuffle=True))
                     self.batch = next(self.test_iterator)
             else:
                 self.batch = self.test_set[:]
@@ -322,7 +313,7 @@ class PhyloNode():#nn.Module
                 except StopIteration:
                     # StopIteration is thrown if dataset ends
                     # reinitialize data loader 
-                    self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True))
+                    self.val_iterator = iter(DataLoader(self.val_set, batch_size=self.batch_size, shuffle=True))
                     self.batch = next(self.val_iterator)
                 self.batch = next(self.val_iterator)
             else:
