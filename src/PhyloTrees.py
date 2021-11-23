@@ -59,7 +59,7 @@ class gammaManager_exponential(nn.Module):
     
 class gammaManager_Linear(nn.Module):
     def __init__(self, startingTime, maxiter, finalsplit):
-        super(gammaManager_exponential, self).__init__()
+        super(gammaManager_Linear, self).__init__()
         self.gammaParents_0 = torch.tensor(0.0)
         self.gammaParents = torch.tensor(0.0)
         self.timestep = torch.tensor(0.0)
