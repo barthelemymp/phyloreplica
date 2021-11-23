@@ -31,7 +31,7 @@ l1 = int(32*len(dataset1)/lt)
 l2 = int(32*len(dataset2)/lt) 
 l3 = 32 - l1 -l2
 
-vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [512, 256, 128])
+vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
 optimizer1 = optim.Adam(vae1.parameters(),weight_decay=0.01)
 Node1 = PhyloNode(vae1,
           optimizer1, 
@@ -46,7 +46,7 @@ Node1 = PhyloNode(vae1,
     )
 
 
-vae2 = VAE(21, 5, dataset2.len_protein * dataset2.q, [512, 256, 128])
+vae2 = VAE(21, 5, dataset2.len_protein * dataset2.q, [256, 128])
 optimizer2 = optim.Adam(vae2.parameters(),weight_decay=0.01)
 Node2 = PhyloNode(vae2,
           optimizer2, 
@@ -61,7 +61,7 @@ Node2 = PhyloNode(vae2,
     )
 
 
-vae3 = VAE(21, 5, dataset3.len_protein * dataset3.q, [512, 256, 128])
+vae3 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizer3 = optim.Adam(vae3.parameters(),weight_decay=0.01)
 Node3 = PhyloNode(vae3,
           optimizer3, 
@@ -75,7 +75,7 @@ Node3 = PhyloNode(vae3,
           Name="512"
     )
 
-vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [512, 256, 128])
+vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizerR = optim.Adam(vaeR.parameters(),weight_decay=0.01)
 NodeR = PhyloNode(vaeR,
           optimizer3, 
@@ -107,7 +107,7 @@ for step in range(Nstep):
     NodeR.trainingStep(recursive=recursive)
     NodeR.optimizerstep(recursive=recursive)
     callback.updatetrain(NodeR, recursive=True)
-    if step%100==50:
+    if step%1==0:
         NodeR.getNewTestBatch(fullBatch=True)
         NodeR.evalmode(recursive=recursive)
         NodeR.computeLoss(recursive=recursive)
