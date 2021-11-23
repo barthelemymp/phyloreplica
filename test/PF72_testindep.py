@@ -78,7 +78,7 @@ Node3 = PhyloNode(vae3,
 vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizerR = optim.Adam(vaeR.parameters(),weight_decay=0.01)
 NodeR = PhyloNode(vaeR,
-          optimizer3, 
+          optimizerR, 
           lossfn,
           parent=None, 
           children=[], 

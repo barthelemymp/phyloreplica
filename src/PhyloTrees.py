@@ -274,7 +274,7 @@ class PhyloNode():#nn.Module
             self.batch = (seqs,)
             for j in range(1,self.tuplesize):
                 self.batch += (torch.cat(batchlist[j], dim=0),)
-        print(self.Name, self.batch[0].shape, self.batch[1].shape)
+        # print(self.Name, self.batch[0].shape, self.batch[1].shape)
         return self.batch
     
     
