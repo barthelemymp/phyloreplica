@@ -33,6 +33,9 @@ l3 = 32 - l1 -l2
 
 vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
 optimizer1 = optim.Adam(vae1.parameters(),weight_decay=0.01)
+# gammaManager1 = gammaManager_Independant()
+gammaManager1 = gammaManager_Linear(500, 1500, 0.1)
+
 Node1 = PhyloNode(vae1,
           optimizer1, 
           lossfn,
@@ -41,13 +44,15 @@ Node1 = PhyloNode(vae1,
           dataset = dataset1, 
           tuplesize=2, 
           batch_size=l1, 
-          gammaManager = gammaManager_Independant(),
+          gammaManager = gammaManager1,
           Name = "196"
     )
 
 
 vae2 = VAE(21, 5, dataset2.len_protein * dataset2.q, [256, 128])
 optimizer2 = optim.Adam(vae2.parameters(),weight_decay=0.01)
+# gammaManager2 = gammaManager_Independant()
+gammaManager2 = gammaManager_Linear(500, 1500, 0.1)
 Node2 = PhyloNode(vae2,
           optimizer2, 
           lossfn,
@@ -56,13 +61,15 @@ Node2 = PhyloNode(vae2,
           dataset = dataset2, 
           tuplesize=2, 
           batch_size=l2, 
-          gammaManager = gammaManager_Independant(),
+          gammaManager = gammaManager2,
           Name="486"
     )
 
 
 vae3 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizer3 = optim.Adam(vae3.parameters(),weight_decay=0.01)
+# gammaManager3 = gammaManager_Independant()
+gammaManager3 = gammaManager_Linear(500, 1500, 0.1)
 Node3 = PhyloNode(vae3,
           optimizer3, 
           lossfn,
@@ -71,12 +78,14 @@ Node3 = PhyloNode(vae3,
           dataset = dataset3, 
           tuplesize=2, 
           batch_size=l3, 
-          gammaManager = gammaManager_Independant(),
+          gammaManager = gammaManager3,
           Name="512"
     )
 
 vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizerR = optim.Adam(vaeR.parameters(),weight_decay=0.01)
+# gammaManagerR = gammaManager_Independant()
+gammaManagerR = gammaManager_Linear(500, 1500, 0.1)
 NodeR = PhyloNode(vaeR,
           optimizerR, 
           lossfn,
@@ -85,7 +94,7 @@ NodeR = PhyloNode(vaeR,
           dataset = dataset3, 
           tuplesize=2, 
           batch_size=32, 
-          gammaManager = gammaManager_Independant(),
+          gammaManager = gammaManagerR,
           Name="Root"
     )
 

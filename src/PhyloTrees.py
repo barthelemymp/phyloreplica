@@ -26,7 +26,7 @@ class gammaManager_Independant(nn.Module):
     def composeLoss(self, Node):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
-    def updateGamma(self):
+    def updateGamma(self,Node):
             self.timestep +=1
 
     
@@ -50,7 +50,7 @@ class gammaManager_exponential(nn.Module):
     def composeLoss(self, Node):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
-    def updateGamma(self):
+    def updateGamma(self, Node):
         return
     
     def reinitGamma(self, Node):
@@ -58,7 +58,7 @@ class gammaManager_exponential(nn.Module):
         self.gammaChildren = torch.tensor(0.0)
     
 class gammaManager_Linear(nn.Module):
-    def __init__(self, startingTime, maxiter):
+    def __init__(self, startingTime, maxiter, finalsplit):
         super(gammaManager_exponential, self).__init__()
         self.gammaParents_0 = torch.tensor(0.0)
         self.gammaParents = torch.tensor(0.0)
@@ -67,23 +67,25 @@ class gammaManager_Linear(nn.Module):
         self.gammaChildren = torch.tensor(0.0)
         self.startingTime = startingTime
         self.maxiter = maxiter
-        
+        self.finalsplit = finalsplit
     def composeLoss(self, Node):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
-    def updateGamma(self):
+    def updateGamma(self, Node):
         if self.timestep <= self.startingTime:
             self.gammaParents = torch.tensor(0.0)
             self.gammaChildren = torch.tensor(0.0)
+        elif self.timestep == self.startingTime:
+            self.reinitGamma(Node)
         else:
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
         self.timestep+=1
         return self.gammaParents, self.gammaChildren
     
-    def reinitGamma(self, Node, finalsplit):
-        self.gammaParents_0 =finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
-        self.gammaChildren_0 = finalsplit* (Node.loss.clone.detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
+    def reinitGamma(self, Node):
+        self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
+        self.gammaChildren_0 = self.finalsplit* (Node.loss.clone.detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
         
     
 class Callback_SimpleLossSaver():
@@ -424,7 +426,7 @@ class PhyloNode():#nn.Module
         # self.computeLoss(recursive=recursive)
         # self.coupling_loss_Children(recursive=recursive)
         # self.coupling_loss_Parents(recursive=recursive)
-        self.gammaManager.updateGamma()
+        self.gammaManager.updateGamma(self)
         self.gammaManager.timestep += 1
         self.zero_grad(recursive=False)
         Totalloss = self.gammaManager.composeLoss(self)
