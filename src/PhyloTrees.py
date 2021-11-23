@@ -78,7 +78,7 @@ class gammaManager_Linear(nn.Module):
         elif self.timestep == self.startingTime:
             self.reinitGamma(Node)
         else:
-            print(self.gammaParents_0.shape, torch.min(self.timestep,self.maxiter), self.startingTime)
+            print(self.gammaParents_0.shape, self.timestep,self.maxiter, self.startingTime)
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
         self.timestep+=1
