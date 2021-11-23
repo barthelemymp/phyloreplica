@@ -386,7 +386,6 @@ class PhyloNode():#nn.Module
                 self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters.clone().detach())
         if recursive:
             for i in range(len(self.children)):
-                print("lossparents", i)
                 self.children[i].computeCouplingLossParent(recursive=True)
         return self.coupling_loss_Parents
 
@@ -428,10 +427,10 @@ class PhyloNode():#nn.Module
         self.gammaManager.timestep += 1
         self.zero_grad(recursive=False)
         Totalloss = self.gammaManager.composeLoss(self)
-        print("totaloss", Totalloss)
+        # print("totaloss", Totalloss)
         Totalloss.backward()
         #torch.nn.utils.clip_grad_norm_(self.model.parameters(), max_norm=1)
-        print(self.Name)
+        # print(self.Name)
         # self.optimizer.step()
         # self.callback.updatetrain(self)
         
