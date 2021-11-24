@@ -57,6 +57,10 @@ class gammaManager_exponential(nn.Module):
         self.gammaParents_0 = Node.loss
         self.gammaChildren = torch.tensor(0.0)
     
+    
+    
+    
+    
 class gammaManager_Linear(nn.Module):
     def __init__(self, startingTime, maxiter, finalsplit):
         super(gammaManager_Linear, self).__init__()
@@ -68,11 +72,12 @@ class gammaManager_Linear(nn.Module):
         self.startingTime = torch.tensor(startingTime)
         self.maxiter = torch.tensor(maxiter)
         self.finalsplit = torch.tensor(finalsplit)
+        
     def composeLoss(self, Node):
         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
     def updateGamma(self, Node):
-        if self.timestep <= self.startingTime:
+        if self.timestep < self.startingTime:
             self.gammaParents = torch.tensor(0.0)
             self.gammaChildren = torch.tensor(0.0)
         elif self.timestep == self.startingTime:
@@ -80,12 +85,23 @@ class gammaManager_Linear(nn.Module):
         else:
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
+            print()
         self.timestep+=1
         return self.gammaParents, self.gammaChildren
     
     def reinitGamma(self, Node):
-        self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
-        self.gammaChildren_0 = self.finalsplit* (Node.loss.clone.detach()/Node.coupling_loss_Parents.clone.detach()) / (self.maxiter - self.startingTime)
+        print(Node.loss.clone().detach(), Node.coupling_loss_Parents.clone().detach(), Node.coupling_loss_Children.clone().detach(), self.maxiter,self.startingTime)
+        if Node.isRoot:
+            self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
+        elif Node.isLeaf:
+            self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone().detach()) / (self.maxiter - self.startingTime)
+        else:
+            self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone().detach()) / (self.maxiter - self.startingTime)
+            self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
+
+        
+        
+        
         
     
 class Callback_SimpleLossSaver():
