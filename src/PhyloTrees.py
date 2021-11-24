@@ -85,12 +85,11 @@ class gammaManager_Linear(nn.Module):
         else:
             self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
             self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
-            print()
         self.timestep+=1
         return self.gammaParents, self.gammaChildren
     
     def reinitGamma(self, Node):
-        print(Node.loss.clone().detach(), Node.coupling_loss_Parents.clone().detach(), Node.coupling_loss_Children.clone().detach(), self.maxiter,self.startingTime)
+        
         if Node.isRoot:
             self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
         elif Node.isLeaf:

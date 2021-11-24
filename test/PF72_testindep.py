@@ -32,65 +32,6 @@ l1 = int(32*len(dataset1)/lt)
 l2 = int(32*len(dataset2)/lt) 
 l3 = 32 - l1 -l2
 
-class mycallback():
-    def __init__(self,a=5):
-        self.a=a
-    def updatetrain(self,Node, recursive=True):
-        print(Node.Name, Node.gammaManager.gammaParents, Node.gammaManager.gammaChildren)
-        for i in range(len(Node.children)):
-            print("children time of callback", i,Node.children[i].Name )
-            mycallback.updatetrain(Node.children[i])
-    def updatetest(self,Node, recursive=True):
-        print(Node.Name, Node.gammaManager.gammaParents, Node.gammaManager.gammaChildren)
-        for i in range(len(Node.children)):
-            mycallback.updatetest(Node.children[i])
-            
-            
-            
-            
-class gammaManager_Linear(nn.Module):
-    def __init__(self, startingTime, maxiter, finalsplit):
-        super(gammaManager_Linear, self).__init__()
-        self.gammaParents_0 = torch.tensor(0.0)
-        self.gammaParents = torch.tensor(0.0)
-        self.timestep = torch.tensor(0.0)
-        self.gammaChildren_0 = torch.tensor(0.0)
-        self.gammaChildren = torch.tensor(0.0)
-        self.startingTime = torch.tensor(startingTime)
-        self.maxiter = torch.tensor(maxiter)
-        self.finalsplit = torch.tensor(finalsplit)
-    def composeLoss(self, Node):
-        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
-    
-    def updateGamma(self, Node):
-        if self.timestep < self.startingTime:
-            print("before start")
-            self.gammaParents = torch.tensor(0.0)
-            self.gammaChildren = torch.tensor(0.0)
-        elif self.timestep == self.startingTime:
-            print("start")
-            self.reinitGamma(Node)
-        else:
-            print("after start")
-            self.gammaParents = self.gammaParents_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
-            self.gammaChildren =  self.gammaChildren_0 * (torch.min(self.timestep,self.maxiter) - self.startingTime)
-            print()
-        self.timestep+=1
-        return self.gammaParents, self.gammaChildren
-    
-    def reinitGamma(self, Node):
-        print(Node.loss.clone().detach(), Node.coupling_loss_Parents.clone().detach(), Node.coupling_loss_Children.clone().detach(), self.maxiter,self.startingTime)
-        if Node.isRoot:
-            self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
-        elif Node.isLeaf:
-            self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone().detach()) / (self.maxiter - self.startingTime)
-        else:
-            self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone().detach()) / (self.maxiter - self.startingTime)
-            self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
-        for k in range(30):
-            print(self.gammaParents_0)
-            print(self.gammaChildren_0)
-    
 
 for fsplit in [0.0, 0.01, 0.1, 0.2, 0.5, 1.0]:
     vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
