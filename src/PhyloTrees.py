@@ -133,7 +133,7 @@ class Callback_WandBSimpleLossSaver():
         
     def pushConfig(self, config=None):
         if config==None:
-            wandb.config.update(self.config_dict) 
+            wandb.config.update(self.config_dict)
         else:
             self.config_dict = config
             wandb.config.update(self.config_dict) 
@@ -179,8 +179,7 @@ class Callback_WandBSimpleLossSaver():
 # class gammaManager_Selflearning(nn.Module):
 #     def __init__(self, startingTime, maxiter):
 #         super(gammaManager_selflearning, self).__init__()
-
-        
+ 
 #     def composeLoss(self, Node):
 #         return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
@@ -188,7 +187,6 @@ class Callback_WandBSimpleLossSaver():
 #         for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
 #             self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters)
 #         return self.gammaParents, self.gammaChildren
-    
 #     def reinitGamma(self, Node, finalsplit):
 
     

@@ -95,7 +95,7 @@ NodeRO = PhyloNode(vaeR,
           lossfn,
           parent=None, 
           children=[], 
-          dataset = dataset3, 
+          dataset = [], 
           tuplesize=2, 
           batch_size=32, 
           gammaManager = gammaManagerR,
@@ -106,25 +106,65 @@ for fsplit in [0.0, 0.01, 0.1, 0.2, 0.5, 1.0]:
     gammaManager1 = gammaManager_Linear(500, 1500, fsplit)
     gammaManager2 = gammaManager_Linear(500, 1500, fsplit)
     gammaManager3 = gammaManager_Linear(500, 1500, fsplit)
+    
+    Node1 = PhyloNode(copy.deepcopy(vae1),
+              copy.deepcopy(optimizer1), 
+              lossfn,
+              parent=None, 
+              children=[], 
+              dataset = [Node1O.train_set, Node1O.test_set, Node1O.val_set], 
+              tuplesize=2, 
+              batch_size=l1, 
+              gammaManager = gammaManager1,
+              Name = "196"
+        )
+    
+    Node2 = PhyloNode(copy.deepcopy(vae2),
+              copy.deepcopy(optimizer2), 
+              lossfn,
+              parent=None, 
+              children=[], 
+              dataset =  [Node2O.train_set, Node2O.test_set, Node2O.val_set], 
+              tuplesize=2, 
+              batch_size=l2, 
+              gammaManager = gammaManager2,
+              Name="486"
+        )
+    
+    Node3 = PhyloNode(copy.deepcopy(vae3),
+              copy.deepcopy(optimizer3), 
+              lossfn,
+              parent=None, 
+              children=[], 
+              dataset = [Node3O.train_set, Node3O.test_set, Node3O.val_set], 
+              tuplesize=2, 
+              batch_size=l3, 
+              gammaManager = gammaManager3,
+              Name="512"
+        )
+    
     gammaManagerRoot = gammaManager_Linear(500, 1500, fsplit)
-    Node1 = copy.deepcopy(Node1O)
-    Node1.gammaManager = gammaManager1
-    Node2 = copy.deepcopy(Node2O)
-    Node2.gammaManager = gammaManager2
-    Node3 = copy.deepcopy(Node3O)
-    Node3.gammaManager = gammaManager3
-    NodeR = copy.deepcopy(NodeRO)
-    NodeR.gammaManager = gammaManagerRoot
-    
-    
+    NodeR = PhyloNode(copy.deepcopy(vaeR),
+              copy.deepcopy(optimizerR), 
+              lossfn,
+              parent=None, 
+              children=[], 
+              tuplesize=2, 
+              batch_size=32, 
+              gammaManager = gammaManagerRoot,
+              Name="Root"
+        )
+   
+
     NodeR.addChildren(Node1)
     NodeR.addChildren(Node2)
     NodeR.addChildren(Node3)
+    
     callback = Callback_WandBSimpleLossSaver("pf72 phylotree")
     callback.updateConfig("gamma manager", "Linear")
     callback.updateConfig("final split", fsplit)
     callback.updateConfig("familly", "pf72(196 486 512)")
-    callback.updateConfig("layers", "256 128")
+    callback.updateConfig("layers", "512 256 128")
     callback.updateConfig("batch size", "Full batch")
     callback.updateConfig("weight_decay", 0.0)
     callback.updateConfig("scheduler", "No scheduler")
