@@ -34,8 +34,8 @@ l3 = 32 - l1 -l2
 
 
 
-vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
-optimizer1 = optim.Adam(vae1.parameters(),weight_decay=0.01)
+vae1 = VAE(21, 5, dataset1.len_protein * dataset1.q, [512, 256, 128])
+optimizer1 = optim.Adam(vae1.parameters())
 # gammaManager1 = gammaManager_Independant()
 gammaManager1 = gammaManager_Linear(500, 1500, 0)
 Node1O = PhyloNode(vae1,
@@ -51,8 +51,8 @@ Node1O = PhyloNode(vae1,
     )
 Node1O.kmeansSplit(6)
 
-vae2 = VAE(21, 5, dataset2.len_protein * dataset2.q, [256, 128])
-optimizer2 = optim.Adam(vae2.parameters(),weight_decay=0.01)
+vae2 = VAE(21, 5, dataset2.len_protein * dataset2.q, [512, 256, 128])
+optimizer2 = optim.Adam(vae2.parameters())
 # gammaManager2 = gammaManager_Independant()
 gammaManager2 = gammaManager_Linear(500, 1500, 0)
 Node2O = PhyloNode(vae2,
@@ -68,8 +68,8 @@ Node2O = PhyloNode(vae2,
     )
 Node2O.kmeansSplit(6)
 
-vae3 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
-optimizer3 = optim.Adam(vae3.parameters(),weight_decay=0.01)
+vae3 = VAE(21, 5, dataset3.len_protein * dataset3.q, [512,256, 128])
+optimizer3 = optim.Adam(vae3.parameters())
 # gammaManager3 = gammaManager_Independant()
 gammaManager3 = gammaManager_Linear(500, 1500,0)
 Node3O = PhyloNode(vae3,
@@ -85,8 +85,8 @@ Node3O = PhyloNode(vae3,
     )
 Node3O.kmeansSplit(6)
 
-vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
-optimizerR = optim.Adam(vaeR.parameters(),weight_decay=0.01)
+vaeR =  VAE(21, 5, dataset3.len_protein * dataset3.q, [512, 256, 128])
+optimizerR = optim.Adam(vaeR.parameters())
 # gammaManagerR = gammaManager_Independant()
 gammaManagerR = gammaManager_Linear(500, 1500, 0)
 NodeRO = PhyloNode(vaeR,
@@ -125,9 +125,9 @@ for fsplit in [0.0, 0.01, 0.1, 0.2, 0.5, 1.0]:
     callback.updateConfig("familly", "pf72(196 486 512)")
     callback.updateConfig("layers", "256 128")
     callback.updateConfig("batch size", "Full batch")
-    callback.updateConfig("weight_decay", 0.01)
+    callback.updateConfig("weight_decay", 0.0)
     callback.updateConfig("scheduler", "No scheduler")
-    Nstep = 5000
+    Nstep = 3000
     for step in range(Nstep):
         recursive = True
         NodeR.getNewTrainBatch(fullBatch=True)
