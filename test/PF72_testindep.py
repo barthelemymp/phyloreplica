@@ -11,6 +11,7 @@ from PhyloTrees import *
 from vae import *
 import torch
 import wandb
+import copy
 torch.autograd.set_detect_anomaly(True)
 
 datapath1 = "../data/PF00072/PF00072_rp15_has_PF00196.faa"
