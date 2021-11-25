@@ -218,7 +218,7 @@ class PhyloNode():#nn.Module
         self.dataset = dataset
         self.batch_size = batch_size
         if dataset !=None:
-            if isinstance(ini_list1, list):
+            if isinstance(dataset, list):
                 self.train_set = dataset[0]
                 self.test_set = dataset[1]
                 self.val_set = dataset[2]
