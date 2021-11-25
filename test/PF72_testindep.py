@@ -87,7 +87,7 @@ Node3O = PhyloNode(vae30,
 Node3O.kmeansSplit(6)
 
 vaeR0 =  VAE(21, 5, dataset3.len_protein * dataset3.q, [512, 256, 128])
-optimizerR0 = optim.Adam(vaeR.parameters())
+optimizerR0 = optim.Adam(vaeR0.parameters())
 # gammaManagerR = gammaManager_Independant()
 gammaManagerR = gammaManager_Linear(500, 1500, 0)
 NodeRO = PhyloNode(vaeR0,
