@@ -15,6 +15,7 @@ import wandb
 from torch._six import string_classes
 import collections
 from torch.utils.data import Dataset, DataLoader
+from sklearn.cluster import KMeans
 
 class gammaManager_Independant(nn.Module):
     def __init__(self):
@@ -217,10 +218,15 @@ class PhyloNode():#nn.Module
         self.dataset = dataset
         self.batch_size = batch_size
         if dataset !=None:
-            trainL = int(0.8 * len(dataset))
-            testL = int(0.1 * len(dataset))
-            valL = len(dataset) - trainL -testL
-            self.train_set, self.test_set,  self.val_set = torch.utils.data.random_split(dataset, [trainL, testL, valL])
+            if isinstance(ini_list1, list):
+                self.train_set = dataset[0]
+                self.test_set = dataset[1]
+                self.val_set = dataset[2]
+            else:
+                trainL = int(0.8 * len(dataset))
+                testL = int(0.1 * len(dataset))
+                valL = len(dataset) - trainL -testL
+                self.train_set, self.test_set,  self.val_set = torch.utils.data.random_split(dataset, [trainL, testL, valL])
             self.train_iterator = iter(DataLoader(self.train_set, batch_size=batch_size, shuffle=True))
             self.test_iterator = iter(DataLoader(self.test_set, batch_size=batch_size, shuffle=True))
             self.val_iterator = iter(DataLoader(self.val_set, batch_size=batch_size, shuffle=True))
@@ -237,10 +243,18 @@ class PhyloNode():#nn.Module
         self.coupling_loss_Children = torch.tensor(0.0)
         self.loss = torch.tensor(0.0)
         
-    
+    def kmeansSplit(self,K):
+        assert self.dataset !=None
+        kmeans = KMeans(n_clusters=K, random_state=0).fit(self.dataset.sequences)
+        
+        self.train_set = torch.utils.data.Subset(self.dataset, kmeans.labels_<=K-3)
+        self.test_set = torch.utils.data.Subset(self.dataset, kmeans.labels_==K-2)
+        self.val_set = torch.utils.data.Subset(self.dataset, kmeans.labels_==K-1)
+
+        
     def getTrainLength(self): 
         if self.isLeaf:
-            return int(0.8 * len(self.dataset))
+            return int(0.8 * len(self.dataset))#### error if kmeans TO DO
         else: 
             l = 0
             for i in range(len(self.children)):
