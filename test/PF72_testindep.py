@@ -36,7 +36,7 @@ l3 = 32 - l1 -l2
 
 
 vae10 = VAE(21, 5, dataset1.len_protein * dataset1.q, [512, 256, 128])
-optimizer10 = optim.Adam(vae1.parameters())
+optimizer10 = optim.Adam(vae10.parameters())
 # gammaManager1 = gammaManager_Independant()
 gammaManager1 = gammaManager_Linear(500, 1500, 0)
 Node1O = PhyloNode(vae1,
@@ -53,7 +53,7 @@ Node1O = PhyloNode(vae1,
 Node1O.kmeansSplit(6)
 
 vae20 = VAE(21, 5, dataset2.len_protein * dataset2.q, [512, 256, 128])
-optimizer20 = optim.Adam(vae2.parameters())
+optimizer20 = optim.Adam(vae20.parameters())
 # gammaManager2 = gammaManager_Independant()
 gammaManager2 = gammaManager_Linear(500, 1500, 0)
 Node2O = PhyloNode(vae2,
@@ -70,7 +70,7 @@ Node2O = PhyloNode(vae2,
 Node2O.kmeansSplit(6)
 
 vae30 = VAE(21, 5, dataset3.len_protein * dataset3.q, [512,256, 128])
-optimizer30 = optim.Adam(vae3.parameters())
+optimizer30 = optim.Adam(vae30.parameters())
 # gammaManager3 = gammaManager_Independant()
 gammaManager3 = gammaManager_Linear(500, 1500,0)
 Node3O = PhyloNode(vae3,
