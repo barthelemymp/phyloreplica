@@ -36,7 +36,7 @@ class gammaManager_Independant(nn.Module):
         self.gammaChildren = torch.tensor(0.0)
         
 class gammaManager_Constant(nn.Module):
-    def __init__(self, gammaParents,gammaChildren, startingTime=0.0)):
+    def __init__(self, gammaParents,gammaChildren, startingTime=0.0):
         super(gammaManager_Independant, self).__init__()
         self.gammaParents_0 = torch.tensor(gammaParents)
         self.gammaChildren_0 = torch.tensor(gammaChildren)
