@@ -151,6 +151,13 @@ class MSA(torch.utils.data.Dataset):
     def uniformWeights(self):
         self.train_weight = torch.ones(self.train_weight.shape)
         
+    def to_(self, device):
+        if device != None:
+            self.train_weight= self.train_weight.to(device, non_blocking=True)
+            self.sequences= self.sequences.to(device, non_blocking=True)
+            if self.get_fitness !=None:
+                self.fitness= self.fitness.to(device, non_blocking=True)
+        
         
         
 

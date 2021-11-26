@@ -29,11 +29,14 @@ class gammaManager_Independant(nn.Module):
     
     def updateGamma(self,Node):
             self.timestep +=1
-
-    
     def reinitGamma(self, Node):
-        self.gammaParents = torch.tensor(0.0)
-        self.gammaChildren = torch.tensor(0.0)
+        self.gammaParents = torch.tensor(0.0).to(self.gammaParents.device)
+        self.gammaChildren = torch.tensor(0.0).to(self.gammaChildren.device)
+    def to_(self,device):
+        self.gammaParents = self.gammaParents.to(device)
+        self.gammaChildren = self.gammaChildren.to(device)
+        self.timestep = self.timestep.to(device)
+        
         
 class gammaManager_Constant(nn.Module):
     def __init__(self, gammaParents,gammaChildren, startingTime=0.0):
@@ -42,7 +45,7 @@ class gammaManager_Constant(nn.Module):
         self.gammaChildren_0 = torch.tensor(gammaChildren)
         self.gammaParents = torch.tensor(0.0)
         self.gammaChildren = torch.tensor(0.0)
-        self.startingTime = startingTime
+        self.startingTime = torch.tensor(startingTime)
         self.timestep = torch.tensor(0.0)
         
     def composeLoss(self, Node):
@@ -50,17 +53,23 @@ class gammaManager_Constant(nn.Module):
     
     def updateGamma(self, Node):
         if self.timestep < self.startingTime:
-            self.gammaParents = torch.tensor(0.0)
-            self.gammaChildren = torch.tensor(0.0)
-        elif self.timestep == self.startingTime:
+            self.gammaParents = torch.tensor(0.0).to(self.gammaParents.device)
+            self.gammaChildren = torch.tensor(0.0).to(self.gammaParents.device)
+        else:
             self.gammaParents = self.gammaParents_0
             self.gammaChildren = self.gammaChildren_0
         self.timestep+=1
         return self.gammaParents, self.gammaChildren
-    def reinitGamma(self, Node):
-        self.gammaParents = torch.tensor(0.0)
-        self.gammaChildren = torch.tensor(0.0)
-        
+    # def reinitGamma(self, Node):
+    #     self.gammaParents = 0.0
+    #     self.gammaChildren = 0.0
+    def to_(self, device):
+        self.gammaParents_0 = self.gammaParents_0.to(device)
+        self.gammaChildren_0 = self.gammaChildren_0.to(device)
+        self.gammaParents = self.gammaParents.to(device)
+        self.gammaChildren = self.gammaChildren.to(device)
+        self.startingTime = self.startingTime.to(device)
+        self.timestep = self.timestep.to(device)
     
 class gammaManager_exponential(nn.Module):
     def __init__(self, startingTime, maxiter):
@@ -123,6 +132,16 @@ class gammaManager_Linear(nn.Module):
         else:
             self.gammaParents_0 =self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Parents.clone().detach()) / (self.maxiter - self.startingTime)
             self.gammaChildren_0 = self.finalsplit* (Node.loss.clone().detach()/Node.coupling_loss_Children.clone().detach()) / (self.maxiter - self.startingTime)
+            
+    def to_(self,device):
+        self.gammaParents_0 = self.gammaParents_0.to(device)
+        self.gammaParents = self.gammaParents.to(device)
+        self.timestep = self.timestep.to(device)
+        self.gammaChildren_0 = self.gammaChildren_0.to(device)
+        self.gammaChildren = self.gammaChildren.to(device)
+        self.startingTime = self.startingTime.to(device)
+        self.maxiter = self.maxiter.to(device)
+        self.finalsplit = self.finalsplit.to(device)
 
         
         
@@ -221,7 +240,7 @@ class Callback_WandBSimpleLossSaver():
 
     
 
-class PhyloNode(nn.Module):#nn.Module
+class PhyloNode():#nn.Module
     def __init__(self, 
                  model, 
                  optimizer, 
@@ -235,7 +254,7 @@ class PhyloNode(nn.Module):#nn.Module
                  # callback=Callback_SimpleLossSaver(), 
                  Name="Root"
                  ):
-        super(PhyloNode, self).__init__()
+        # super(PhyloNode, self).__init__()
         self.model = model
         self.Name = Name
         self.optimizer = optimizer
@@ -445,7 +464,7 @@ class PhyloNode(nn.Module):#nn.Module
     
     def computeCouplingLossParent(self, recursive=True):
         loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
-        self.coupling_loss_Parents = torch.tensor(0.0)
+        self.coupling_loss_Parents = torch.zeros_like(self.coupling_loss_Parents)
         if self.isRoot==False:
             for center_parameters, replica_parameters in zip(self.model.parameters(), self.parent.model.parameters()):
                 self.coupling_loss_Parents += loss_fn_elastic(center_parameters, replica_parameters.clone().detach())
@@ -458,7 +477,7 @@ class PhyloNode(nn.Module):#nn.Module
     def computeCouplingLossChildren(self, recursive=True):
         
         loss_fn_elastic = torch.nn.MSELoss(reduction='sum')
-        self.coupling_loss_Children = torch.tensor(0.0)
+        self.coupling_loss_Children = torch.zeros_like(self.coupling_loss_Children)
         if self.isLeaf==False:
             for i in range(len(self.children)):
                 child = self.children[i]
@@ -506,6 +525,23 @@ class PhyloNode(nn.Module):#nn.Module
         if recursive:
             for i in range(len(self.children)):
                 self.children[i].optimizerstep(recursive=recursive)
+    def to_(self, device, recursive=True):
+        self.model = self.model.to(device)
+        if self.dataset is not None:
+            self.train_set.dataset.to_(device)
+            self.test_set.dataset.to_(device)
+            self.val_set.dataset.to_(device)
+            self.train_iterator = iter(DataLoader(self.train_set, batch_size=self.batch_size, shuffle=True))
+            self.test_iterator = iter(DataLoader(self.test_set, batch_size=self.batch_size, shuffle=True))
+            self.val_iterator = iter(DataLoader(self.val_set, batch_size=self.batch_size, shuffle=True))
+        self.gammaManager.to_(device)
+        self.coupling_loss_Parents = self.coupling_loss_Parents.to(device)
+        self.coupling_loss_Children = self.coupling_loss_Children.to(device)
+        self.loss = self.loss.to(device)
+        if recursive:
+            for i in range(len(self.children)):
+                self.children[i].to_(device, recursive=recursive)
+            
         
     # def testingStep(self, recursive=True):
     #     # self.getnewTrainBatch()
