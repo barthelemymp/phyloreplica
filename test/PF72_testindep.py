@@ -172,8 +172,7 @@ for Wdecay in [0.0, 0.001, 0.01]:
             
             
             callback = Callback_WandBSimpleLossSaver("pf72 phylotree")
-            callback.updateConfig("gamma manager", "Linear")
-            callback.updateConfig("final split", fsplit)
+            callback.updateConfig("gamma manager", "Constant")
             callback.updateConfig("familly", "pf72(196 486 512)")
             callback.updateConfig("layers", "512 256 128")
             callback.updateConfig("batch size", "Full batch")
