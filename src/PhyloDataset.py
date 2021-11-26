@@ -128,7 +128,8 @@ class MSA(torch.utils.data.Dataset):
         if device != None:
             self.train_weight= self.train_weight.to(device, non_blocking=True)
             self.sequences= self.sequences.to(device, non_blocking=True)
-            self.fitness= self.fitness.to(device, non_blocking=True)
+            if get_fitness !=None:
+                self.fitness= self.fitness.to(device, non_blocking=True)
 
     def __len__(self):
         return self.sequences.shape[0]

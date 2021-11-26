@@ -14,6 +14,8 @@ import wandb
 import copy
 torch.autograd.set_detect_anomaly(True)
 
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 datapath1 = "../data/PF00072/PF00072_rp15_has_PF00196.faa"
 datapath2 = "../data/PF00072/PF00072_rp15_has_PF00486.faa"
 datapath3 = "../data/PF00072/PF00072_rp15_has_PF00512.faa"
