@@ -38,10 +38,10 @@ l3 = 32 - l1 -l2
 
 
 
-vae10 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128]).to(device)
+vae10 = VAE(21, 5, dataset1.len_protein * dataset1.q, [256, 128])
 optimizer10 = optim.Adam(vae10.parameters())
 # gammaManager1 = gammaManager_Independant()
-gammaManager1 = gammaManager_Linear(500, 1500, 0).to(device)
+gammaManager1 = gammaManager_Linear(500, 1500, 0)
 Node1O = PhyloNode(vae10,
           optimizer10, 
           lossfn,
@@ -52,13 +52,13 @@ Node1O = PhyloNode(vae10,
           batch_size=l1, 
           gammaManager = gammaManager1,
           Name = "196"
-    ).to(device)
+    )
 Node1O.kmeansSplit(6)
 
-vae20 = VAE(21, 5, dataset2.len_protein * dataset2.q, [256, 128]).to(device)
+vae20 = VAE(21, 5, dataset2.len_protein * dataset2.q, [256, 128])
 optimizer20 = optim.Adam(vae20.parameters())
 # gammaManager2 = gammaManager_Independant()
-gammaManager2 = gammaManager_Linear(500, 1500, 0).to(device)
+gammaManager2 = gammaManager_Linear(500, 1500, 0)
 Node2O = PhyloNode(vae20,
           optimizer20, 
           lossfn,
@@ -69,7 +69,7 @@ Node2O = PhyloNode(vae20,
           batch_size=l2, 
           gammaManager = gammaManager2,
           Name="486"
-    ).to(device)
+    )
 Node2O.kmeansSplit(6)
 
 vae30 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128]).to(device)
@@ -89,7 +89,7 @@ Node3O = PhyloNode(vae30,
     ).to(device)
 Node3O.kmeansSplit(6)
 
-vaeR0 =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128]).to(device)
+vaeR0 =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizerR0 = optim.Adam(vaeR0.parameters())
 # gammaManagerR = gammaManager_Independant()
 gammaManagerR = gammaManager_Linear(500, 1500, 0).to(device)
@@ -102,98 +102,101 @@ NodeRO = PhyloNode(vaeR0,
           batch_size=32, 
           gammaManager = gammaManagerR,
           Name="Root"
-    ).to(device)
+    )
 
 for Wdecay in [0.0, 0.001, 0.01]:
     for gammaP in [0.0, 0.001, 0.005, 0.01, 0.1, 0.5]:
         for gammC in [0.0, 0.001, 0.005, 0.01, 0.1, 0.5]:
-        gammaManager1 = gammaManager_Constant(gammaP,gammC)
-        gammaManager2 = gammaManager_Constant(gammaP,gammC)
-        gammaManager3 = gammaManager_Constant(gammaP,gammC)
-        vae1 = copy.deepcopy(vae10).to(device)
-        optimizer1 = optim.Adam(vae1.parameters(),weight_decay=Wdecay)
-        Node1 = PhyloNode(vae1,
-                  optimizer1, 
-                  lossfn,
-                  parent=None, 
-                  children=[], 
-                  dataset = [Node1O.train_set, Node1O.test_set, Node1O.val_set], 
-                  tuplesize=2, 
-                  batch_size=l1, 
-                  gammaManager = gammaManager1,
-                  Name = "196"
-            ).to(device)
-        vae2 = copy.deepcopy(vae20).to(device)
-        optimizer2 = optim.Adam(vae2.parameters(),weight_decay=Wdecay)
-        Node2 = PhyloNode(vae2,
-                  optimizer2, 
-                  lossfn,
-                  parent=None, 
-                  children=[], 
-                  dataset =  [Node2O.train_set, Node2O.test_set, Node2O.val_set], 
-                  tuplesize=2, 
-                  batch_size=l2, 
-                  gammaManager = gammaManager2,
-                  Name="486"
-            ).to(device)
-        vae3 = copy.deepcopy(vae30).to(device)
-        optimizer3 = optim.Adam(vae3.parameters(),weight_decay=Wdecay)
-        Node3 = PhyloNode(vae3,
-                  optimizer3, 
-                  lossfn,
-                  parent=None, 
-                  children=[], 
-                  dataset = [Node3O.train_set, Node3O.test_set, Node3O.val_set], 
-                  tuplesize=2, 
-                  batch_size=l3, 
-                  gammaManager = gammaManager3,
-                  Name="512"
-            ).to(device)
-        vaeR = copy.deepcopy(vaeR0).to(device)
-        optimizerR = optim.Adam(vaeR.parameters(),weight_decay=Wdecay)
-        gammaManagerRoot = gammaManager_Constant(gammaP, gammC)
-        NodeR = PhyloNode(vaeR,
-                  optimizerR, 
-                  lossfn,
-                  parent=None, 
-                  children=[], 
-                  tuplesize=2, 
-                  batch_size=32, 
-                  gammaManager = gammaManagerRoot,
-                  Name="Root"
-            ).to(device)
-       
-    
-        NodeR.addChildren(Node1)
-        NodeR.addChildren(Node2)
-        NodeR.addChildren(Node3)
+            gammaManager1 = gammaManager_Constant(gammaP,gammC)
+            gammaManager2 = gammaManager_Constant(gammaP,gammC)
+            gammaManager3 = gammaManager_Constant(gammaP,gammC)
+            vae1 = copy.deepcopy(vae10)
+            optimizer1 = optim.Adam(vae1.parameters(),weight_decay=Wdecay)
+            Node1 = PhyloNode(vae1,
+                      optimizer1, 
+                      lossfn,
+                      parent=None, 
+                      children=[], 
+                      dataset = [Node1O.train_set, Node1O.test_set, Node1O.val_set], 
+                      tuplesize=2, 
+                      batch_size=l1, 
+                      gammaManager = gammaManager1,
+                      Name = "196"
+                )
+            vae2 = copy.deepcopy(vae20)
+            optimizer2 = optim.Adam(vae2.parameters(),weight_decay=Wdecay)
+            Node2 = PhyloNode(vae2,
+                      optimizer2, 
+                      lossfn,
+                      parent=None, 
+                      children=[], 
+                      dataset =  [Node2O.train_set, Node2O.test_set, Node2O.val_set], 
+                      tuplesize=2, 
+                      batch_size=l2, 
+                      gammaManager = gammaManager2,
+                      Name="486"
+                )
+            vae3 = copy.deepcopy(vae30).to(device)
+            optimizer3 = optim.Adam(vae3.parameters(),weight_decay=Wdecay)
+            Node3 = PhyloNode(vae3,
+                      optimizer3, 
+                      lossfn,
+                      parent=None, 
+                      children=[], 
+                      dataset = [Node3O.train_set, Node3O.test_set, Node3O.val_set], 
+                      tuplesize=2, 
+                      batch_size=l3, 
+                      gammaManager = gammaManager3,
+                      Name="512"
+                )
+            vaeR = copy.deepcopy(vaeR0)
+            optimizerR = optim.Adam(vaeR.parameters(),weight_decay=Wdecay)
+            gammaManagerRoot = gammaManager_Constant(gammaP, gammC)
+            NodeR = PhyloNode(vaeR,
+                      optimizerR, 
+                      lossfn,
+                      parent=None, 
+                      children=[], 
+                      tuplesize=2, 
+                      batch_size=32, 
+                      gammaManager = gammaManagerRoot,
+                      Name="Root"
+                )
+            
+           
         
-        callback = Callback_WandBSimpleLossSaver("pf72 phylotree")
-        callback.updateConfig("gamma manager", "Linear")
-        callback.updateConfig("final split", fsplit)
-        callback.updateConfig("familly", "pf72(196 486 512)")
-        callback.updateConfig("layers", "512 256 128")
-        callback.updateConfig("batch size", "Full batch")
-        callback.updateConfig("weight_decay",Wdecay)
-        callback.updateConfig("scheduler", "No scheduler")
-        Nstep = 2000
-        for step in range(Nstep):
-            recursive = True
-            NodeR.getNewTrainBatch(fullBatch=True)
-            NodeR.trainmode(recursive=recursive)
-            NodeR.computeLoss(recursive=recursive)
-            NodeR.computeCouplingLossChildren(recursive=recursive)
-            print("children loss done")
-            NodeR.computeCouplingLossParent(recursive=recursive)
-            NodeR.trainingStep(recursive=recursive)
-            NodeR.optimizerstep(recursive=recursive)
-            callback.updatetrain(NodeR, recursive=True)
-            if step%1==0:
-                NodeR.getNewTestBatch(fullBatch=True)
-                NodeR.evalmode(recursive=recursive)
+            NodeR.addChildren(Node1)
+            NodeR.addChildren(Node2)
+            NodeR.addChildren(Node3)
+            NodeR.to_(device, recursive=True)
+            
+            
+            callback = Callback_WandBSimpleLossSaver("pf72 phylotree")
+            callback.updateConfig("gamma manager", "Linear")
+            callback.updateConfig("final split", fsplit)
+            callback.updateConfig("familly", "pf72(196 486 512)")
+            callback.updateConfig("layers", "512 256 128")
+            callback.updateConfig("batch size", "Full batch")
+            callback.updateConfig("weight_decay",Wdecay)
+            callback.updateConfig("scheduler", "No scheduler")
+            Nstep = 2000
+            for step in range(Nstep):
+                recursive = True
+                NodeR.getNewTrainBatch(fullBatch=True)
+                NodeR.trainmode(recursive=recursive)
                 NodeR.computeLoss(recursive=recursive)
-                callback.updatetest(NodeR, recursive=True)
-        wandb.finish()
+                NodeR.computeCouplingLossChildren(recursive=recursive)
+                print("children loss done")
+                NodeR.computeCouplingLossParent(recursive=recursive)
+                NodeR.trainingStep(recursive=recursive)
+                NodeR.optimizerstep(recursive=recursive)
+                callback.updatetrain(NodeR, recursive=True)
+                if step%1==0:
+                    NodeR.getNewTestBatch(fullBatch=True)
+                    NodeR.evalmode(recursive=recursive)
+                    NodeR.computeLoss(recursive=recursive)
+                    callback.updatetest(NodeR, recursive=True)
+            wandb.finish()
         
     
     
