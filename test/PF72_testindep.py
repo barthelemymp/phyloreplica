@@ -72,10 +72,10 @@ Node2O = PhyloNode(vae20,
     )
 Node2O.kmeansSplit(6)
 
-vae30 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128]).to(device)
+vae30 = VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizer30 = optim.Adam(vae30.parameters())
 # gammaManager3 = gammaManager_Independant()
-gammaManager3 = gammaManager_Linear(500, 1500,0).to(device)
+gammaManager3 = gammaManager_Linear(500, 1500,0)
 Node3O = PhyloNode(vae30,
           optimizer30, 
           lossfn,
@@ -86,13 +86,13 @@ Node3O = PhyloNode(vae30,
           batch_size=l3, 
           gammaManager = gammaManager3,
           Name="512"
-    ).to(device)
+    )
 Node3O.kmeansSplit(6)
 
 vaeR0 =  VAE(21, 5, dataset3.len_protein * dataset3.q, [256, 128])
 optimizerR0 = optim.Adam(vaeR0.parameters())
 # gammaManagerR = gammaManager_Independant()
-gammaManagerR = gammaManager_Linear(500, 1500, 0).to(device)
+gammaManagerR = gammaManager_Linear(500, 1500, 0)
 NodeRO = PhyloNode(vaeR0,
           optimizerR0, 
           lossfn,
@@ -136,7 +136,7 @@ for Wdecay in [0.0, 0.001, 0.01]:
                       gammaManager = gammaManager2,
                       Name="486"
                 )
-            vae3 = copy.deepcopy(vae30).to(device)
+            vae3 = copy.deepcopy(vae30)
             optimizer3 = optim.Adam(vae3.parameters(),weight_decay=Wdecay)
             Node3 = PhyloNode(vae3,
                       optimizer3, 
