@@ -28,9 +28,9 @@ datapath8 = "data/PF00072/PF00072_rp15_has_PF12833.faa"
 
 lossfn = vae_loss
 
-dataset1 = MSA(datapath1, device=device)
-dataset2 = MSA(datapath2, device=device)
-dataset3 = MSA(datapath3, device=device)
+dataset1 = MSA(datapath1)
+dataset2 = MSA(datapath2)
+dataset3 = MSA(datapath3)
 lt = len(dataset1) + len(dataset2) + len(dataset1)
 l1 = int(32*len(dataset1)/lt) 
 l2 = int(32*len(dataset2)/lt) 
