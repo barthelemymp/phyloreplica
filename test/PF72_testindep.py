@@ -100,11 +100,13 @@ NodeRO = PhyloNode(vaeR0,
           gammaManager = gammaManagerR,
           Name="Root"
     )
-for Wdecay in [0.0, 0.001, 0.01, 0.1]:
-    for fsplit in [0.0, 0.01, 0.1, 0.2, 0.5, 1.0]:
-        gammaManager1 = gammaManager_Linear(500, 1500, fsplit)
-        gammaManager2 = gammaManager_Linear(500, 1500, fsplit)
-        gammaManager3 = gammaManager_Linear(500, 1500, fsplit)
+
+for Wdecay in [0.0, 0.001, 0.01]:
+    for gammaP in [0.0, 0.001, 0.005, 0.01, 0.1, 0.5]:
+        for gammC in [0.0, 0.001, 0.005, 0.01, 0.1, 0.5]:
+        gammaManager1 = gammaManager_Constant(gammaP,gammC)
+        gammaManager2 = gammaManager_Constant(gammaP,gammC)
+        gammaManager3 = gammaManager_Constant(gammaP,gammC)
         vae1 = copy.deepcopy(vae10)
         optimizer1 = optim.Adam(vae1.parameters(),weight_decay=Wdecay)
         Node1 = PhyloNode(vae1,
@@ -146,7 +148,7 @@ for Wdecay in [0.0, 0.001, 0.01, 0.1]:
             )
         vaeR = copy.deepcopy(vaeR0)
         optimizerR = optim.Adam(vaeR.parameters(),weight_decay=Wdecay)
-        gammaManagerRoot = gammaManager_Linear(500, 1500, fsplit)
+        gammaManagerRoot = gammaManager_Constant(gammaP, gammC)
         NodeR = PhyloNode(vaeR,
                   optimizerR, 
                   lossfn,
@@ -169,9 +171,9 @@ for Wdecay in [0.0, 0.001, 0.01, 0.1]:
         callback.updateConfig("familly", "pf72(196 486 512)")
         callback.updateConfig("layers", "512 256 128")
         callback.updateConfig("batch size", "Full batch")
-        callback.updateConfig("weight_decay", 0.0)
+        callback.updateConfig("weight_decay",Wdecay)
         callback.updateConfig("scheduler", "No scheduler")
-        Nstep = 3000
+        Nstep = 2000
         for step in range(Nstep):
             recursive = True
             NodeR.getNewTrainBatch(fullBatch=True)

@@ -35,7 +35,32 @@ class gammaManager_Independant(nn.Module):
         self.gammaParents = torch.tensor(0.0)
         self.gammaChildren = torch.tensor(0.0)
         
+class gammaManager_Constant(nn.Module):
+    def __init__(self, gammaParents,gammaChildren, startingTime=0.0)):
+        super(gammaManager_Independant, self).__init__()
+        self.gammaParents_0 = torch.tensor(gammaParents)
+        self.gammaChildren_0 = torch.tensor(gammaChildren)
+        self.gammaParents = torch.tensor(0.0)
+        self.gammaChildren = torch.tensor(0.0)
+        self.startingTime = startingTime
+        self.timestep = torch.tensor(0.0)
+        
+    def composeLoss(self, Node):
+        return Node.loss + self.gammaParents * Node.coupling_loss_Parents + self.gammaChildren * Node.coupling_loss_Children
     
+    def updateGamma(self, Node):
+        if self.timestep < self.startingTime:
+            self.gammaParents = torch.tensor(0.0)
+            self.gammaChildren = torch.tensor(0.0)
+        elif self.timestep == self.startingTime:
+            self.gammaParents = self.gammaParents_0
+            self.gammaChildren = self.gammaChildren_0
+        self.timestep+=1
+        return self.gammaParents, self.gammaChildren
+    def reinitGamma(self, Node):
+        self.gammaParents = torch.tensor(0.0)
+        self.gammaChildren = torch.tensor(0.0)
+        
     
 class gammaManager_exponential(nn.Module):
     def __init__(self, startingTime, maxiter):
@@ -143,7 +168,12 @@ class Callback_WandBSimpleLossSaver():
         self.pushConfig()
 
     def updatetrain(self,Node, recursive=True):
-        wandb.log({"Train loss"+Node.Name: Node.loss.item(), "epoch":Node.gammaManager.timestep, "gamma parents":Node.gammaManager.gammaParents, "gamma children":Node.gammaManager.gammaChildren })
+        wandb.log({"Train loss"+Node.Name: Node.loss.item(), 
+                   "epoch":Node.gammaManager.timestep, 
+                   "gamma parents"+Node.Name:Node.gammaManager.gammaParents, 
+                   "gamma children"+Node.Name:Node.gammaManager.gammaChildren,
+                   "distance Loss"+Node.Name:Node.coupling_loss_Parents
+                   })
         if Node.isLeaf==False:
             if recursive:
                 for i in range(len(Node.children)):
@@ -215,7 +245,7 @@ class PhyloNode():#nn.Module
         self.isRoot = parent==None
         self.dataset = dataset
         self.batch_size = batch_size
-        if dataset !=None:
+        if dataset is not None:
             if isinstance(dataset, list):
                 self.train_set = dataset[0]
                 self.test_set = dataset[1]
