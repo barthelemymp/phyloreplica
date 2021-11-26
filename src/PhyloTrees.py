@@ -221,7 +221,7 @@ class Callback_WandBSimpleLossSaver():
 
     
 
-class PhyloNode():#nn.Module
+class PhyloNode(nn.Module):#nn.Module
     def __init__(self, 
                  model, 
                  optimizer, 
@@ -235,7 +235,7 @@ class PhyloNode():#nn.Module
                  # callback=Callback_SimpleLossSaver(), 
                  Name="Root"
                  ):
-        # super(PhyloNode, self).__init__()
+        super(PhyloNode, self).__init__()
         self.model = model
         self.Name = Name
         self.optimizer = optimizer
@@ -506,7 +506,7 @@ class PhyloNode():#nn.Module
         if recursive:
             for i in range(len(self.children)):
                 self.children[i].optimizerstep(recursive=recursive)
-                
+        
     # def testingStep(self, recursive=True):
     #     # self.getnewTrainBatch()
     #     # self.trainmode(recursive=recursive)
