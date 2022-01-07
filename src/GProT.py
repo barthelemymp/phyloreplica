@@ -149,13 +149,13 @@ class Block(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        self.ln1 = nn.LayerNorm(config.vocab_size)#n_embd
-        self.ln2 = nn.LayerNorm(config.vocab_size)#n_embd
+        self.ln1 = nn.LayerNorm(config.n_embd)#n_embd
+        self.ln2 = nn.LayerNorm(config.n_embd)#n_embd
         self.attn = CausalSelfAttention(config)
         self.mlp = nn.Sequential(
-            nn.Linear(config.vocab_size, config.n_embd),#n_embd-4n_embd
+            nn.Linear(config.n_embd, 4*config.n_embd),#n_embd-4n_embd
             nn.GELU(),
-            nn.Linear(config.n_embd, config.vocab_size),#4n_embd-n_embd
+            nn.Linear(config.n_embd, 4*config.n_embd),#4n_embd-n_embd
             nn.Dropout(config.resid_pdrop),
         )
 
@@ -171,7 +171,7 @@ class GPT(nn.Module):
         super().__init__()
 
         # input embedding stem
-        # self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
+        self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         # self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
         self.position_embedding = PositionalEncoding(config.vocab_size, max_len=config.block_size, device=device)
         self.drop = nn.Dropout(config.embd_pdrop)
@@ -250,9 +250,10 @@ class GPT(nn.Module):
         assert L <= self.block_size, "Cannot forward, model block size is exhausted."
 
         # # forward the GPT model
-        # token_embeddings = self.tok_emb(idx) # each index maps to a (learnable) vector
+        token_embeddings = self.tok_emb(seq) # each index maps to a (learnable) vector
         # position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
-        x = self.position_embedding(seq) #self.drop(token_embeddings + position_embeddings)
+
+        x = self.position_embedding(token_embeddings) #self.drop(token_embeddings + position_embeddings)
         x = self.blocks(x)
         x = self.ln_f(x)
         logits = self.head(x)

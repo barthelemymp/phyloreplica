@@ -61,7 +61,7 @@ def read_fasta(fasta_path, alphabet='ACDEFGHIKLMNPQRSTVWY-', default_index=20):
 
 
 class MSA(torch.utils.data.Dataset):
-    def __init__(self, fastaPath,  mapstring = 'ACDEFGHIKLMNPQRSTVWY-', transform=None, device=None, get_fitness = None, flatten=False):
+    def __init__(self, fastaPath,  mapstring = 'ACDEFGHIKLMNPQRSTVWY-', transform=None, device=None, get_fitness = None, flatten=False, onehot=True):
         """
         Args:
             fastaPath (string): Path to the fasta file with annotations.
@@ -95,10 +95,13 @@ class MSA(torch.utils.data.Dataset):
         self.train_weight = (self.train_weight / torch.sum(self.train_weight))
         self.gap = "-"
         train_msa = torch.nn.functional.one_hot(torch.from_numpy(seq_nat).long(), num_classes=self.q)
-        if flatten:
-            self.sequences = train_msa.view(train_msa.shape[0], -1).float()
+        if onehot:
+            if flatten:
+                self.sequences = train_msa.view(train_msa.shape[0], -1).float()
+            else:
+                self.sequences = train_msa.float()
         else:
-            self.sequences = train_msa.float()
+            self.sequences = train_msa.max(dim=2)[1].float()
         
 #         self.tensorIN=torch.zeros(self.inputsize,len(df), 25)
 #         self.tensorOUT=torch.zeros(self.outputsize,len(df), 25)

@@ -36,9 +36,9 @@ datapath8 = "data/PF00072/PF00072_rp15_has_PF12833.faa"
 
 lossfn = GPT_loss
 
-dataset1 = MSA(datapath1)
-dataset2 = MSA(datapath2)
-dataset3 = MSA(datapath3)
+dataset1 = MSA(datapath1,onehot=False)
+dataset2 = MSA(datapath2,onehot=False)
+dataset3 = MSA(datapath3,onehot=False)
 maxbs = 64
 lt = len(dataset1) + len(dataset2) + len(dataset1)
 l1 = int(32*len(dataset1)/lt) 
