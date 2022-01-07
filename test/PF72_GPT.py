@@ -187,7 +187,7 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
         callback.updateConfig("n_head = 7", co.n_head)
         callback.updateConfig("internal dim", co.n_embd)
         callback.updateConfig("batch size", "Full batch")
-        callback.updateConfig("weight_decay",Wdecay)
+        # callback.updateConfig("weight_decay",Wdecay)
         callback.updateConfig("scheduler", "No scheduler")
         Nstep = 2000
         for step in range(Nstep):
