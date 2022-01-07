@@ -61,7 +61,7 @@ def read_fasta(fasta_path, alphabet='ACDEFGHIKLMNPQRSTVWY-', default_index=20):
 
 
 class MSA(torch.utils.data.Dataset):
-    def __init__(self, fastaPath,  mapstring = 'ACDEFGHIKLMNPQRSTVWY-', transform=None, device=None, get_fitness = None):
+    def __init__(self, fastaPath,  mapstring = 'ACDEFGHIKLMNPQRSTVWY-', transform=None, device=None, get_fitness = None, flatten=False):
         """
         Args:
             fastaPath (string): Path to the fasta file with annotations.
@@ -95,7 +95,10 @@ class MSA(torch.utils.data.Dataset):
         self.train_weight = (self.train_weight / torch.sum(self.train_weight))
         self.gap = "-"
         train_msa = torch.nn.functional.one_hot(torch.from_numpy(seq_nat).long(), num_classes=self.q)
-        self.sequences = train_msa.view(train_msa.shape[0], -1).float()
+        if flatten:
+            self.sequences = train_msa.view(train_msa.shape[0], -1).float()
+        else:
+            self.sequences = train_msa.float()
         
 #         self.tensorIN=torch.zeros(self.inputsize,len(df), 25)
 #         self.tensorOUT=torch.zeros(self.outputsize,len(df), 25)
@@ -208,4 +211,36 @@ class PhyloNodeDataset(torch.utils.data.Dataset):
             
         treeIdx = self.mappingTree[idx]
         return self.list_of_dataset[treeIdx].__getitem__(idx)
+    
+# class PhyloNodeDataset(torch.utils.data.Dataset):
+#     def __init__(self, list_of_dataset, mappingTree,weights=None):
+#         self.list_of_dataset = list_of_dataset
+#         if weights !=None:
+#             self.weights=weights
+#         else:
+#             self.weights = []
+#             self.totlen = 0
+#             for i in range(len(list_of_dataset)):
+#                 self.totlen += len(list_of_dataset[i])
+#                 self.weights.append(len(list_of_dataset[i]))
+#             self.weights /= self.totlen
+            
+#         self.isNode = []
+#         self.mappingTree = mappingTree
+#         for i in range(len(list_of_dataset)):
+#             self.isNode.append(not isinstance(list_of_dataset[i], PhyloNodeDataset))
+            
+#     def __len__(self):
+#         length = 0
+#         for i in range(len(list_of_dataset)):
+#             length+=len(self.list_of_dataset[i])
+#         return length
+    
+#     def __getitem__(self, idx): # from the dataset, gives the data in the form it will be used by the NN
+#         if torch.is_tensor(idx):
+#             idx = idx.tolist()
+            
+#         treeIdx = self.mappingTree[idx]
+#         return self.list_of_dataset[treeIdx].__getitem__(idx)
+    
     
