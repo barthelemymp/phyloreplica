@@ -119,9 +119,9 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
         gammaManager1 = gammaManager_Constant(gammaP,gammC)
         gammaManager2 = gammaManager_Constant(gammaP,gammC)
         gammaManager3 = gammaManager_Constant(gammaP,gammC)
-        vae1 = copy.deepcopy(vae10)
-        optimizer1 = optim.Adam(vae1.parameters(),weight_decay=Wdecay)
-        Node1 = PhyloNode(vae1,
+        GPT1 = copy.deepcopy(GPT10)
+        optimizer1 = optim.Adam(GPT1.parameters())
+        Node1 = PhyloNode(GPT1,
                   optimizer1, 
                   lossfn,
                   parent=None, 
@@ -132,9 +132,9 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
                   gammaManager = gammaManager1,
                   Name = "196"
             )
-        vae2 = copy.deepcopy(vae20)
-        optimizer2 = optim.Adam(vae2.parameters(),weight_decay=Wdecay)
-        Node2 = PhyloNode(vae2,
+        GPT2 = copy.deepcopy(GPT20)
+        optimizer2 = optim.Adam(GPT2.parameters())
+        Node2 = PhyloNode(GPT2,
                   optimizer2, 
                   lossfn,
                   parent=None, 
@@ -145,9 +145,9 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
                   gammaManager = gammaManager2,
                   Name="486"
             )
-        vae3 = copy.deepcopy(vae30)
-        optimizer3 = optim.Adam(vae3.parameters(),weight_decay=Wdecay)
-        Node3 = PhyloNode(vae3,
+        GPT3 = copy.deepcopy(GPT30)
+        optimizer3 = optim.Adam(GPT3.parameters())
+        Node3 = PhyloNode(GPT3,
                   optimizer3, 
                   lossfn,
                   parent=None, 
@@ -158,10 +158,10 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
                   gammaManager = gammaManager3,
                   Name="512"
             )
-        vaeR = copy.deepcopy(vaeR0)
-        optimizerR = optim.Adam(vaeR.parameters(),weight_decay=Wdecay)
+        GPTR = copy.deepcopy(GPTR0)
+        optimizerR = optim.Adam(GPTR.parameters())
         gammaManagerRoot = gammaManager_Constant(gammaP, gammC)
-        NodeR = PhyloNode(vaeR,
+        NodeR = PhyloNode(GPTR,
                   optimizerR, 
                   lossfn,
                   parent=None, 
