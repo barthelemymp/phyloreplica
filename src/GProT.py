@@ -109,11 +109,11 @@ class CausalSelfAttention(nn.Module):
 
     def __init__(self, config):
         super().__init__()
-        assert config.vocab_size % config.n_head == 0
+        assert config.n_embd % config.n_head == 0
         # key, query, value projections for all heads
-        self.key = nn.Linear(config.vocab_size, config.vocab_size)
-        self.query = nn.Linear(config.vocab_size, config.vocab_size)
-        self.value = nn.Linear(config.vocab_size, config.vocab_size)
+        self.key = nn.Linear(config.n_embd, config.n_embd)
+        self.query = nn.Linear(config.n_embd, config.n_embd)
+        self.value = nn.Linear(config.n_embd, config.n_embd)
         # regularization
         self.attn_drop = nn.Dropout(config.attn_pdrop)
         self.resid_drop = nn.Dropout(config.resid_pdrop)
