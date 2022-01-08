@@ -18,7 +18,7 @@ torch.autograd.set_detect_anomaly(True)
 
 
 config = GPTConfig(21, 112)
-co = GPT1Config(21, 112)
+co = GPT1Config(21, 111)
 co.n_layer = 3
 co.n_head = 7
 co.n_embd = 50*21
