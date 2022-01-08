@@ -189,10 +189,10 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
         callback.updateConfig("batch size", "Full batch")
         # callback.updateConfig("weight_decay",Wdecay)
         callback.updateConfig("scheduler", "No scheduler")
-        Nstep = 2000
+        Nstep = 10000
         for step in range(Nstep):
             recursive = True
-            NodeR.getNewTrainBatch(fullBatch=True)
+            NodeR.getNewTrainBatch(fullBatch=False)
             NodeR.trainmode(recursive=recursive)
             NodeR.computeLoss(recursive=recursive)
             NodeR.computeCouplingLossChildren(recursive=recursive)
@@ -202,7 +202,7 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
             NodeR.optimizerstep(recursive=recursive)
             callback.updatetrain(NodeR, recursive=True)
             if step%1==0:
-                NodeR.getNewTestBatch(fullBatch=True)
+                NodeR.getNewTestBatch(fullBatch=False)
                 NodeR.evalmode(recursive=recursive)
                 NodeR.computeLoss(recursive=recursive)
                 callback.updatetest(NodeR, recursive=True)
