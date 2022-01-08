@@ -180,8 +180,8 @@ class GPT(nn.Module):
         # transformer
         self.blocks = nn.Sequential(*[Block(config) for _ in range(config.n_layer)])
         # decoder head
-        self.ln_f = nn.LayerNorm(config.vocab_size)#n_embd
-        self.head = nn.Linear(config.vocab_size, config.vocab_size, bias=False)#n_embd#n_embd
+        self.ln_f = nn.LayerNorm(config.n_embd)#n_embd
+        self.head = nn.Linear(config.n_embd, config.vocab_size, bias=False)#n_embd#n_embd
 
         self.block_size = config.block_size
         self.apply(self._init_weights)
