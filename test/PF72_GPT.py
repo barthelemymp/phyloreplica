@@ -180,7 +180,7 @@ for gammaP in [0.0, 0.001, 0.01, 0.1]:
         NodeR.to_(device, recursive=True)
         
         
-        callback = Callback_WandBSimpleLossSaver("pf72 phylotree VAE")
+        callback = Callback_WandBSimpleLossSaver("pf72 phylotree GPT")
         callback.updateConfig("gamma manager", "Constant")
         callback.updateConfig("familly", "pf72(196 486 512)")
         callback.updateConfig("n layers",co.n_layer )

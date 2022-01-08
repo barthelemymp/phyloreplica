@@ -171,6 +171,7 @@ class GPT(nn.Module):
         super().__init__()
 
         # input embedding stem
+        self.vocab_size = config.vocab_size
         self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         # self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
         self.position_embedding = PositionalEncoding(config.vocab_size, max_len=config.block_size, device=device)
@@ -269,6 +270,6 @@ class GPT(nn.Module):
 
 
 def GPT_loss(model, batch):
-    inp = batch[0].reshape(-1, batch[0].shape[2])
-    tar = batch[0].max(dim=2)[1].flatten()
+    inp = model(batch[0][:,:-1]).reshape(-1, model.vocab_size)
+    tar = batch[0][:,1:].flatten()
     return F.cross_entropy(inp, tar)
