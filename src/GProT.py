@@ -174,7 +174,7 @@ class GPT(nn.Module):
         self.vocab_size = config.vocab_size
         self.tok_emb = nn.Embedding(config.vocab_size, config.n_embd)
         # self.pos_emb = nn.Parameter(torch.zeros(1, config.block_size, config.n_embd))
-        self.position_embedding = PositionalEncoding(config.vocab_size, max_len=config.block_size, device=device)
+        self.position_embedding = PositionalEncoding(config.n_embd, max_len=config.block_size, device=device)
         self.drop = nn.Dropout(config.embd_pdrop)
         self.device = device
         # transformer
