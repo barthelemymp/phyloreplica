@@ -270,6 +270,6 @@ class GPT(nn.Module):
 
 
 def GPT_loss(model, batch):
-    inp = model(batch[0][:,:-1]).reshape(-1, model.vocab_size)
+    inp = model(batch[0][:,:-1])[0].reshape(-1, model.vocab_size)
     tar = batch[0][:,1:].flatten()
     return F.cross_entropy(inp, tar)
