@@ -70,7 +70,7 @@ class PositionalEncoding(nn.Module):
         """
         #print( self.pe[:x.size(0), :].shape)
         
-        x = (x + self.pe[:x.size(0), :]).to(self.device)
+        x = (x + self.pe[:, :]).to(self.device)
         return self.dropout(x)
     
 
