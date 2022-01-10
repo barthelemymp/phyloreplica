@@ -60,6 +60,8 @@ def read_fasta(fasta_path, alphabet='ACDEFGHIKLMNPQRSTVWY-', default_index=20):
     return seq_msa, seq_weight,keys_list, len(alphabet)
 
 
+
+
 class MSA(torch.utils.data.Dataset):
     def __init__(self, fastaPath,  mapstring = 'ACDEFGHIKLMNPQRSTVWY-', transform=None, device=None, get_fitness = None, flatten=False, onehot=True):
         """
@@ -69,6 +71,7 @@ class MSA(torch.utils.data.Dataset):
                 on a sample.
         """
         seq_nat, w_nat, ks, q = read_fasta(fastaPath)
+        self.onehot = onehot
         self.q = q
         self.get_fitness = get_fitness
         if get_fitness !=None:
@@ -107,6 +110,8 @@ class MSA(torch.utils.data.Dataset):
 #         self.tensorOUT=torch.zeros(self.outputsize,len(df), 25)
         self.device = device
         self.transform = transform
+
+            
 #         self.batch_first = batch_first
 
 #         if Unalign==False:
@@ -163,6 +168,39 @@ class MSA(torch.utils.data.Dataset):
             self.sequences= self.sequences.to(device, non_blocking=True)
             if self.get_fitness !=None:
                 self.fitness= self.fitness.to(device, non_blocking=True)
+    
+    def pad(self, maxlen, padsymbol="<pad>"):
+        self.SymbolMap["<pad>"] = self.q+1
+        self.q+=1
+        ### TO DO
+        
+    def terminate(self, sos="<sos>", eos="<eos>"):
+        self.init_token = sos
+        self.eos_token = eos
+        if sos not in self.SymbolMap:
+            self.SymbolMap[sos] = self.q
+            self.q+=1
+            
+        if eos not in self.SymbolMap:
+            self.SymbolMap[eos] = self.q
+            self.q+=1
+        
+        if self.onehot:
+            seq = self.sequences.max(dim=2)[1].float()
+            eos_list = torch.ones(self.sequences.shape[0], 1).to(self.sequences.device)*self.SymbolMap[eos]
+            sos_list = torch.ones(self.sequences.shape[0], 1).to(self.sequences.device)*self.SymbolMap[sos]
+            seq = torch.cat([sos_list, seq, eos_list], dim=1)
+            self.sequences = torch.nn.functional.one_hot(seq.long(), num_classes=self.q)
+        
+        else:
+            eos_list = torch.ones(self.sequences.shape[0], 1).to(self.sequences.device)*self.SymbolMap[eos]
+            sos_list = torch.ones(self.sequences.shape[0], 1).to(self.sequences.device)*self.SymbolMap[sos]
+            self.sequences = torch.cat([sos_list, self.sequences, eos_list], dim=1)
+        self.len_protein +=2
+            
+            
+        
+        
         
         
         

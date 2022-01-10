@@ -51,8 +51,8 @@ class PositionalEncoding(nn.Module):
         pe = torch.zeros(max_len, d_model).to(device)
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
-        pe[:, 0::2] = torch.sin(position * div_term)
-        pe[:, 1::2] = torch.cos(position * div_term)
+        pe[:, 0::2] = torch.sin(position * div_term)[:,:pe[:, 0::2].shape[1]]
+        pe[:, 1::2] = torch.cos(position * div_term)[:,:pe[:, 1::2].shape[1]]
         #pe = pe[:,:-1] #this step is not really smart, needed when d_model is odd. 
         pe = pe.unsqueeze(0)#.transpose(0, 1)
         self.register_buffer('pe', pe)
@@ -137,11 +137,15 @@ class CausalSelfAttention(nn.Module):
         att = att.masked_fill(self.mask[:,:,:T,:T] == 0, float('-inf'))
         att = F.softmax(att, dim=-1)
         att = self.attn_drop(att)
+        # print("attshape", att.shape)
+        # print(att[0,0,:10,:10])
         y = att @ v # (B, nh, T, T) x (B, nh, T, hs) -> (B, nh, T, hs)
         y = y.transpose(1, 2).contiguous().view(B, T, C) # re-assemble all head outputs side by side
 
         # output projection
+        
         y = self.resid_drop(self.proj(y))
+        print("yshape", y.shape)
         return y
 
 class Block(nn.Module):
@@ -249,7 +253,7 @@ class GPT(nn.Module):
     def forward(self, seq, targets=None):
         b, L= seq.size()
         assert L <= self.block_size, "Cannot forward, model block size is exhausted."
-
+        print(L)
         # # forward the GPT model
         token_embeddings = self.tok_emb(seq.long()) # each index maps to a (learnable) vector
         # position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
@@ -270,6 +274,10 @@ class GPT(nn.Module):
 
 
 def GPT_loss(model, batch):
+
     inp = model(batch[0][:,:-1])[0].reshape(-1, model.vocab_size)
+
     tar = batch[0][:,1:].flatten().long()
+
+    
     return F.cross_entropy(inp, tar)
