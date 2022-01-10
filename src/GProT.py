@@ -145,7 +145,7 @@ class CausalSelfAttention(nn.Module):
         # output projection
         
         y = self.resid_drop(self.proj(y))
-        print("yshape", y.shape)
+
         return y
 
 class Block(nn.Module):
@@ -253,7 +253,7 @@ class GPT(nn.Module):
     def forward(self, seq, targets=None):
         b, L= seq.size()
         assert L <= self.block_size, "Cannot forward, model block size is exhausted."
-        print(L)
+
         # # forward the GPT model
         token_embeddings = self.tok_emb(seq.long()) # each index maps to a (learnable) vector
         # position_embeddings = self.pos_emb[:, :t, :] # each position maps to a (learnable) vector
